@@ -1,0 +1,22 @@
+.home-page__container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+.home-page__title {
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.home-page__input-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
