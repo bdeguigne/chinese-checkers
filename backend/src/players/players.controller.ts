@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseInterceptors,
@@ -11,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { PlayersService } from './players.service';
 import { CreatePlayerDto } from './dto/create-player.dto';
-import { UpdatePlayerDto } from './dto/update-player.dto';
 import { TransformResponseInterceptor } from 'src/core/transform-response.interceptor';
 import { HttpExceptionFilter } from 'src/core/http-expection.filters';
 import { FindOneParams } from 'src/core/validators/find-one-params';
@@ -47,13 +45,22 @@ export class PlayersController {
     return this.playersService.findOne(params.id);
   }
 
-  @Patch(':id')
+  // @Patch(':id')
+  // @UseFilters(new HttpExceptionFilter())
+  // update(
+  //   @Param() params: FindOneParams,
+  //   @Body() updatePlayerDto: UpdatePlayerDto,
+  // ) {
+  //   return this.playersService.update(params.id, updatePlayerDto);
+  // }
+
+  @Delete('all')
   @UseFilters(new HttpExceptionFilter())
-  update(
-    @Param() params: FindOneParams,
-    @Body() updatePlayerDto: UpdatePlayerDto,
-  ) {
-    return this.playersService.update(params.id, updatePlayerDto);
+  @UseInterceptors(
+    new TransformResponseInterceptor('Successfully deleted all players'),
+  )
+  removeAll() {
+    return this.playersService.removeAll();
   }
 
   @Delete(':id')

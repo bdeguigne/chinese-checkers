@@ -1,0 +1,18 @@
+.create-room__container {
+  p {
+    font-size: medium;
+  }
+  width: 100%;
+  display: flex;
+  align-items: center;
+  // flex-direction: row;
+}
+
+.create-room__element {
+  text-align: center;
+}
+
+.create-room__button {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}

@@ -1,5 +1,7 @@
 import { Document } from 'mongoose';
+import { Player } from 'src/players/interface/player.interface';
 
 export interface Room extends Document {
-  name: string;
+  playersCount: number;
+  players: Player[];
 }

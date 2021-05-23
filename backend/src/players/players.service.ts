@@ -2,7 +2,6 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { PLAYER_MODEL } from 'src/constants';
 import { CreatePlayerDto } from './dto/create-player.dto';
-import { UpdatePlayerDto } from './dto/update-player.dto';
 import { Player } from './interface/player.interface';
 
 @Injectable()
@@ -13,8 +12,8 @@ export class PlayersService {
   ) {}
 
   async create(createPlayerDto: CreatePlayerDto): Promise<Player> {
-    const createdRoom = new this.playerModel(createPlayerDto);
-    return createdRoom.save();
+    const createdPlayer = new this.playerModel(createPlayerDto);
+    return createdPlayer.save();
   }
 
   async findAll(): Promise<Player[]> {
@@ -30,10 +29,6 @@ export class PlayersService {
     }
   }
 
-  update(id: number, updatePlayerDto: UpdatePlayerDto) {
-    return `This action updates a #${id} player`;
-  }
-
   async remove(id: number): Promise<Player | null> {
     const deletedPlayer = await this.playerModel
       .findByIdAndRemove({ _id: id }, { useFindAndModify: false })
@@ -43,5 +38,9 @@ export class PlayersService {
     } else {
       return deletedPlayer;
     }
+  }
+
+  async removeAll(): Promise<any> {
+    return await this.playerModel.deleteMany({}).exec();
   }
 }

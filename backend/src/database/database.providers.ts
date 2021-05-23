@@ -5,6 +5,8 @@ export const databaseProviders = [
   {
     provide: DATABASE_CONNECTION,
     useFactory: (): Promise<typeof mongoose> =>
-      mongoose.connect('mongodb://localhost/chinese-checkers-nest'),
+      mongoose.connect('mongodb://localhost/chinese-checkers-nest', {
+        useFindAndModify: false,
+      }),
   },
 ];

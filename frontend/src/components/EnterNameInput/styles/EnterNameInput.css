@@ -1,10 +1,10 @@
 .home-page__input {
-  width: 200px;
-  margin-bottom: 32px;
+  width: 100%;
+  margin-bottom: 16px;
 }
 
 .home-page__button {
   height: 50px;
-  width: 300px;
+  width: 100%;
 }
 /*# sourceMappingURL=EnterNameInput.css.map */

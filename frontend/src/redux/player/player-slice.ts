@@ -3,27 +3,34 @@ import type { RootState } from "../store";
 
 // Define a type for the slice state
 interface PlayerState {
-  name: string;
+  player: Player;
 }
 
 // Define the initial state using that type
 const initialState: PlayerState = {
-  name: "default Name",
+  player: {
+    _id: "",
+    name: "",
+    avatar: {
+      seed: "",
+      type: "",
+    },
+  },
 };
 
 export const playerSlice = createSlice({
   name: "player",
   initialState,
   reducers: {
-    setName: (state, action: PayloadAction<string>) => {
-      state.name = action.payload;
+    setPlayer: (state, action: PayloadAction<Player>) => {
+      state.player = action.payload;
     },
   },
 });
 
-export const { setName } = playerSlice.actions;
+export const { setPlayer } = playerSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
-export const selectPlayer = (state: RootState) => state.player.name;
+export const selectPlayer = (state: RootState) => state.player.player;
 
 export default playerSlice.reducer;

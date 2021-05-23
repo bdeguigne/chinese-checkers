@@ -11,11 +11,11 @@ import {
 } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto } from './dto/create-room.dto';
-import { UpdateRoomDto } from './dto/update-room.dto';
 import { Room } from './interface/room.interface';
 import { FindOneParams } from 'src/core/validators/find-one-params';
 import { HttpExceptionFilter } from 'src/core/http-expection.filters';
 import { TransformResponseInterceptor } from 'src/core/transform-response.interceptor';
+import { PlayerParams } from './params/player.params';
 
 @Controller('rooms')
 export class RoomsController {
@@ -39,11 +39,6 @@ export class RoomsController {
     return this.roomsService.findAll();
   }
 
-  // @Get()
-  // watchAll(): Observable<Room[]> {
-  //   return of(this.roomsService.findAll());
-  // }
-
   @Get(':id')
   @UseFilters(new HttpExceptionFilter())
   @UseInterceptors(
@@ -53,10 +48,35 @@ export class RoomsController {
     return this.roomsService.findOne(params.id);
   }
 
-  @Patch(':id')
+  @Patch(':id/player/add/:playerId')
   @UseFilters(new HttpExceptionFilter())
-  update(@Param() params: FindOneParams, @Body() updateRoomDto: UpdateRoomDto) {
-    return this.roomsService.update(params.id, updateRoomDto);
+  @UseInterceptors(
+    new TransformResponseInterceptor(
+      'Successfully added a new player in this room',
+    ),
+  )
+  addPlayer(@Param() params: PlayerParams) {
+    return this.roomsService.addPlayer(params.id, params.playerId);
+  }
+
+  @Patch(':id/player/remove/:playerId')
+  @UseFilters(new HttpExceptionFilter())
+  @UseInterceptors(
+    new TransformResponseInterceptor(
+      'Successfully removed a player in this room',
+    ),
+  )
+  removePlayer(@Param() params: PlayerParams) {
+    return this.roomsService.removePlayer(params.id, params.playerId);
+  }
+
+  @Delete('all')
+  @UseFilters(new HttpExceptionFilter())
+  @UseInterceptors(
+    new TransformResponseInterceptor('Successfully deleted all rooms'),
+  )
+  removeAll() {
+    return this.roomsService.removeAll();
   }
 
   @Delete(':id')

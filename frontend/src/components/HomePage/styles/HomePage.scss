@@ -1,14 +1,27 @@
 .home-page__container {
   width: 100%;
   height: 100%;
-  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.home-page__title {
+.home-page-top__container {
   position: absolute;
-  top: 25%;
+  text-align: center;
+  top: 0;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, 0);
+
+  h1 {
+    font-size: 3rem;
+    margin-top: 24px;
+  }
+  h2 {
+    font-size: 2rem;
+    margin-top: 24px;
+    margin-bottom: 24px;
+  }
 }
 
 .home-page__input-container {
@@ -19,4 +32,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 700px;
+}
+
+.home-page__avatar-container {
+  margin-bottom: 32px;
+}
+
+.home-page__join-button {
+  width: 100%;
+  height: 50px;
 }

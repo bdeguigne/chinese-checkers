@@ -1,15 +1,35 @@
 .home-page__container {
   width: 100%;
   height: 100%;
-  position: absolute;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
 }
 
-.home-page__title {
+.home-page-top__container {
   position: absolute;
-  top: 25%;
+  text-align: center;
+  top: 0;
   left: 50%;
-  -webkit-transform: translate(-50%, -50%);
-          transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, 0);
+          transform: translate(-50%, 0);
+}
+
+.home-page-top__container h1 {
+  font-size: 3rem;
+  margin-top: 24px;
+}
+
+.home-page-top__container h2 {
+  font-size: 2rem;
+  margin-top: 24px;
+  margin-bottom: 24px;
 }
 
 .home-page__input-container {
@@ -28,5 +48,15 @@
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
+  width: 700px;
+}
+
+.home-page__avatar-container {
+  margin-bottom: 32px;
+}
+
+.home-page__join-button {
+  width: 100%;
+  height: 50px;
 }
 /*# sourceMappingURL=HomePage.css.map */

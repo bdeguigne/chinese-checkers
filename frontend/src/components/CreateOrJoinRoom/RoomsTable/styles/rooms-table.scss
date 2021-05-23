@@ -1,0 +1,21 @@
+.rooms-table__container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+}
+
+.rooms-table__table-container {
+  position: relative;
+  width: 60%;
+}
+
+.rooms-table__refresh-button {
+  margin-top: 8px;
+  margin-right: 8px;
+  position: absolute;
+  top: 0;
+  right: 0;
+}

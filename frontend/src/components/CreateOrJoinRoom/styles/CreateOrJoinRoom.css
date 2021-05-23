@@ -1,0 +1,23 @@
+.create-room__container {
+  width: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.create-room__container p {
+  font-size: medium;
+}
+
+.create-room__element {
+  text-align: center;
+}
+
+.create-room__button {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+/*# sourceMappingURL=CreateOrJoinRoom.css.map */
