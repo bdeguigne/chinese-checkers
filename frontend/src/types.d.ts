@@ -21,3 +21,7 @@ type Avatar = {
   type: string;
   seed: string;
 }
+
+type LobbyResponse = {
+  event: string,
+}

@@ -12,6 +12,7 @@ export const types = {
 type AvatarType = keyof typeof types;
 
 interface Props {
+  seed?: string;
   type: AvatarType;
   showReloadButton?: boolean;
   onReloadButtonPressed?(): void;
@@ -43,7 +44,9 @@ export const GameAvatar = (props: Props & typeof defaultProps) => {
     <div className={"avatar__container--" + props.type}>
       <img
         className="avatar__image"
-        src={`https://avatars.dicebear.com/api/human/${seed}.svg`}
+        src={`https://avatars.dicebear.com/api/human/${
+          props.seed ? props.seed : seed
+        }.svg`}
         alt="avatar"
       ></img>
       {props.showReloadButton && (

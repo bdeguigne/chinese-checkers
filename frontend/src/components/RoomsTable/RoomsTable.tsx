@@ -1,11 +1,11 @@
 import { Table, Button, Tooltip } from "antd";
 import { FC, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
-import { getAllRooms } from "../../../redux/room/room-thunks";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { getAllRooms } from "../../redux/room/room-thunks";
 import "./styles/rooms-table.css";
 import { ReloadOutlined } from "@ant-design/icons";
 import { RouteChildrenProps } from "react-router-dom";
-import { Routes } from "../../../App";
+import { Routes } from "../../App";
 
 export const RoomsTable: FC<RouteChildrenProps> = (props) => {
   const dispatch = useAppDispatch();

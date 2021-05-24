@@ -1,16 +1,12 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { RoomsModule } from './rooms/rooms.module';
 import { PlayersModule } from './players/players.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
-  imports: [RoomsModule, PlayersModule],
+  imports: [RoomsModule, PlayersModule, EventsModule],
   controllers: [AppController],
   providers: [AppService],
 })

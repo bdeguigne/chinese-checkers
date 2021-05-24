@@ -8,10 +8,10 @@ import { Divider, Button } from "antd";
 import { GameAvatar } from "../GameAvatar/GameAvatar";
 import { RouteChildrenProps } from "react-router-dom";
 import { Routes } from "../../App";
+// import { io, Socket } from "socket.io-client";
 
 const HomePage: FC<RouteChildrenProps> = (props) => {
   const dispatch = useAppDispatch();
-  // const playerName = useAppSelector((state) => state.player.name);
   const [name, setName] = useState("");
   const [seed, setSeed] = useState("");
 

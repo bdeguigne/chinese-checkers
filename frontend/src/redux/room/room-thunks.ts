@@ -13,10 +13,11 @@ export const getAllRooms = (): AppThunk => async (dispatch) => {
 
 export const createRoom =
   (playerId: string, history: History): AppThunk =>
-  async () => {
+  async (dispatch) => {
     roomService
       .create(playerId)
       .then((room) => {
+        dispatch(setCurrentRoom(room));
         history.push(Routes.room + "/" + room._id);
       })
       .catch((error) => console.log("create room error", error));
