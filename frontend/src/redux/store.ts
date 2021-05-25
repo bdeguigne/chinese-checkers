@@ -1,11 +1,13 @@
 import playerReducer from "./player/player-slice";
 import roomReducer from "./room/room-slice";
+import gameReducer from "./game/game-slice";
 import { AnyAction, configureStore, ThunkAction } from "@reduxjs/toolkit";
 
 export const store = configureStore({
   reducer: {
     player: playerReducer,
     room: roomReducer,
+    game: gameReducer,
   },
 });
 

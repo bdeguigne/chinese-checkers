@@ -20,8 +20,21 @@ type Player = {
 type Avatar = {
   type: string;
   seed: string;
-}
+};
 
 type LobbyResponse = {
-  event: string,
-}
+  event: string;
+};
+
+type HexType = {
+  q: number;
+  r: number;
+  s: number;
+};
+
+type PawnAction = {
+  hex: HexType;
+  x: number;
+  y: number;
+  color: string;
+};
