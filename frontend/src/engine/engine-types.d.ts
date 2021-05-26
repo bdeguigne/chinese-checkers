@@ -1,4 +1,4 @@
-import { Hex } from "./engine";
+import { Hex } from "./hex.lib";
 
 type Board = {
   pawns: Pawn[];
@@ -13,5 +13,15 @@ type Pawn = {
 
 type PownIndex = {
   boardIndex: number;
-  coordIndex: number
-}
+  coordIndex: number;
+};
+
+type Movements = {
+  neighborCoords: Hex[];
+  jumpCoords: Hex[];
+};
+
+type MoveInfo = {
+  isNeighbor: boolean;
+  board: Pawn[];
+};

@@ -3,6 +3,7 @@ import { EngineContext } from "../../context/engine-hook";
 import { PawnInfo } from "../../engine/default-board-coords";
 import { Pawn } from "../../engine/engine-types";
 import { Hex } from "../../engine/hex.lib";
+import { moveFinished } from "../../redux/game/game-slice";
 import {
   storeAvailableMovements,
   storeSelectedPawn,
@@ -21,14 +22,38 @@ export const DrawPawn = (props: Props) => {
   const storedAvailableMovements = useAppSelector(
     (state) => state.game.availableMovements
   );
+  const currentHexPosition = useAppSelector(
+    (state) => state.game.currentHexPosition
+  );
 
   const [isHover, setIsHover] = useState(false);
   const engine = useContext(EngineContext);
 
   const onClicked = () => {
-    if (engine.playerCanMoveThisPawn(PawnInfo.playerOne, props.pawn.hex)) {
+    if (
+      storedAvailableMovements !== null &&
+      currentHexPosition &&
+      engine.isHexEqual(
+        props.pawn.hex,
+        new Hex(
+          currentHexPosition.q,
+          currentHexPosition.r,
+          currentHexPosition.s
+        )
+      )
+    ) {
+      dispatch(moveFinished());
+      props.showAvailableMovements([]);
+    } else if (
+      !currentHexPosition &&
+      engine.playerCanMoveThisPawn(PawnInfo.playerTwo, props.pawn.hex)
+    ) {
       dispatch(storeSelectedPawn(props.pawn));
-      const availableMovements = engine.availableMovements(props.pawn.hex);
+      const movements = engine.availableMovements(props.pawn.hex);
+      const availableMovements = movements.jumpCoords.concat(
+        movements.neighborCoords
+      );
+
       dispatch(storeAvailableMovements(availableMovements));
       props.showAvailableMovements(availableMovements);
     } else if (
@@ -45,8 +70,24 @@ export const DrawPawn = (props: Props) => {
   return (
     <circle
       onMouseEnter={() => {
-        if (engine.playerCanMoveThisPawn(PawnInfo.playerOne, props.pawn.hex)) {
-          return setIsHover(true);
+        if (
+          storedAvailableMovements !== null &&
+          currentHexPosition &&
+          engine.isHexEqual(
+            props.pawn.hex,
+            new Hex(
+              currentHexPosition.q,
+              currentHexPosition.r,
+              currentHexPosition.s
+            )
+          )
+        ) {
+          setIsHover(true);
+        } else if (
+          !currentHexPosition &&
+          engine.playerCanMoveThisPawn(PawnInfo.playerTwo, props.pawn.hex)
+        ) {
+          setIsHover(true);
         } else if (
           storedAvailableMovements &&
           engine.playerCanGoToThisHex(
@@ -54,7 +95,7 @@ export const DrawPawn = (props: Props) => {
             props.pawn.hex
           )
         ) {
-          return setIsHover(true);
+          setIsHover(true);
         }
       }}
       onMouseLeave={() => setIsHover(false)}

@@ -5,12 +5,14 @@ import type { RootState } from "../store";
 interface GameState {
   selectedPawn: PawnAction | null;
   availableMovements: HexType[] | null;
+  currentHexPosition: HexType | null;
 }
 
 // Define the initial state using that type
 const initialState: GameState = {
   selectedPawn: null,
   availableMovements: null,
+  currentHexPosition: null,
 };
 
 export const gameSlice = createSlice({
@@ -26,12 +28,20 @@ export const gameSlice = createSlice({
     moveFinished: (state) => {
       state.selectedPawn = null;
       state.availableMovements = null;
+      state.currentHexPosition = null;
+    },
+    setCurrentHexPosition: (state, action: PayloadAction<HexType>) => {
+      state.currentHexPosition = action.payload;
     },
   },
 });
 
-export const { setSelectedPawn, setAvailableMovements, moveFinished } =
-  gameSlice.actions;
+export const {
+  setSelectedPawn,
+  setAvailableMovements,
+  moveFinished,
+  setCurrentHexPosition,
+} = gameSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectSelectedPawn = (state: RootState) => state.game.selectedPawn;

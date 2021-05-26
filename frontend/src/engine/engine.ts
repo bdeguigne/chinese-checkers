@@ -1,9 +1,6 @@
-import { Pawn, PownIndex } from "./engine-types";
+import { MoveInfo, Movements, Pawn, PownIndex } from "./engine-types";
 import { Hex, Layout, OffsetCoord, Point } from "./hex.lib";
 import { defaultBoardCoords, PawnInfo } from "./default-board-coords";
-
-// TODO Faire une class game engine, qui stock l'etat actuel du board.
-// TODO Faire une fonction qui recupere la position d'un pion et return les coordonnées des mouvements disponible (Commencer par les voisins)
 
 export class ChineseCheckersEngine {
   r = 22;
@@ -91,22 +88,55 @@ export class ChineseCheckersEngine {
     return false;
   };
 
-  public availableMovements(hex: Hex): Hex[] {
-    const neighborCoords: Hex[] = [];
+  public availableMovements(hex: Hex): Movements {
+    const movements: Movements = {
+      neighborCoords: [],
+      jumpCoords: [],
+    };
 
-    for (let i = 0; i < 6; i++) {
-      let hexNeighbor = hex.neighbor(i);
+    for (let direction = 0; direction < 6; direction++) {
+      let hexNeighbor = hex.neighbor(direction);
       if (
         this.isHexInsidePawns(
           hexNeighbor,
           this.boardCoordinates[PawnInfo.empty]
         )
       ) {
-        neighborCoords.push(hexNeighbor);
+        movements.neighborCoords.push(hexNeighbor);
+      }
+      let movementCount = 1;
+      let checkHex: Hex = hexNeighbor;
+
+      while (true) {
+        if (
+          this.isHexInsidePawns(checkHex, this.boardCoordinates[PawnInfo.empty])
+        ) {
+          movementCount += 1;
+        } else {
+          break;
+        }
+        checkHex = checkHex.add(Hex.directions[direction]);
+      }
+
+      for (let i = 0; i < movementCount; i++) {
+        checkHex = checkHex.add(Hex.directions[direction]);
+        if (
+          !this.isHexInsidePawns(
+            checkHex,
+            this.boardCoordinates[PawnInfo.empty]
+          )
+        ) {
+          break;
+        }
+      }
+      if (
+        this.isHexInsidePawns(checkHex, this.boardCoordinates[PawnInfo.empty])
+      ) {
+        movements.jumpCoords.push(checkHex);
       }
     }
 
-    return neighborCoords;
+    return movements;
   }
 
   public playerCanMoveThisPawn(pawnInfo: PawnInfo, hex: Hex): boolean {
@@ -155,14 +185,22 @@ export class ChineseCheckersEngine {
     this.boardCoordinates[second.boardIndex][second.coordIndex] = posTmp;
   }
 
-  public move = (posHex: Hex, destHex: Hex): Pawn[] => {
+  public move = (posHex: Hex, destHex: Hex): MoveInfo => {
     let posIndex = this.getPawnIndexInBoard(posHex);
     let destIndex = this.getPawnIndexInBoard(destHex);
+    let isNeighbor = false;
+    for (let direction = 0; direction < 6; direction++) {
+      const hex = posHex.neighbor(direction);
+
+      if (this.isHexEqual(hex, destHex)) {
+        isNeighbor = true;
+      }
+    }
 
     if (posIndex && destIndex) {
       this.swapPawn(posIndex, destIndex);
     }
 
-    return this.boardToPawns(this.boardCoordinates);
+    return { board: this.boardToPawns(this.boardCoordinates), isNeighbor };
   };
 }
