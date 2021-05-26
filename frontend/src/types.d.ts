@@ -7,8 +7,13 @@ type ApiResponse<T> = {
 type Room = {
   _id: string;
   playersCount: number;
-  players: Player[];
+  players: RoomPlayerInfo[];
   creatorName: string;
+};
+
+type RoomPlayerInfo = {
+  info: Player;
+  playerIndex: number;
 };
 
 type Player = {
@@ -22,8 +27,20 @@ type Avatar = {
   seed: string;
 };
 
-type LobbyResponse = {
+type SocketResponse<T = any> = {
   event: string;
+  data: T;
+};
+
+type SocketError = {
+  message: string;
+  status: string;
+};
+
+type GameResponse = {
+  roomId: string;
+  playerIndex?: number;
+  board?: number[][][];
 };
 
 type HexType = {

@@ -1,6 +1,6 @@
 import { AppThunk } from "../store";
 import { create } from "./player-service";
-import { setPlayer } from "./player-slice";
+import { setPlayer, setPlayerIndex } from "./player-slice";
 import { History } from "history";
 import { Routes } from "../../App";
 import { createRoom } from "../room/room-thunks";
@@ -24,4 +24,15 @@ export const createPlayer =
         }
       })
       .catch((error) => console.log("Create Player Error", error));
+  };
+
+export const findPlayerIndexInRoom =
+  (room: Room): AppThunk =>
+  async (dispatch, getState) => {
+    const playerId = getState().player.player._id;
+    room.players.forEach((playerInfo) => {
+      if (playerInfo.info._id === playerId) {
+        dispatch(setPlayerIndex(playerInfo.playerIndex));
+      }
+    });
   };

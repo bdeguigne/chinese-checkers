@@ -6,11 +6,17 @@ export const RoomSchema = new Schema(
       type: Number,
       default: 0,
     },
-    players: Array,
+    players: [
+      {
+        info: Object,
+        playerIndex: Number,
+      },
+    ],
     creatorName: {
       type: String,
       default: '',
     },
+    connectedPlayers: [String],
   },
   {
     versionKey: false,

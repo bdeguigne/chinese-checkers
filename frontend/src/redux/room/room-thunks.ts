@@ -3,6 +3,7 @@ import * as roomService from "./room-service";
 import { setCurrentRoom, setRooms } from "./room-slice";
 import { History } from "history";
 import { Routes } from "../../App";
+import { findPlayerIndexInRoom } from "../player/player-thunks";
 
 export const getAllRooms = (): AppThunk => async (dispatch) => {
   roomService
@@ -18,6 +19,7 @@ export const createRoom =
       .create(playerId)
       .then((room) => {
         dispatch(setCurrentRoom(room));
+        dispatch(findPlayerIndexInRoom(room));
         history.push(Routes.room + "/" + room._id);
       })
       .catch((error) => console.log("create room error", error));
@@ -30,6 +32,7 @@ export const getRoom =
       .getRoom(roomId)
       .then((room) => {
         dispatch(setCurrentRoom(room));
+        dispatch(findPlayerIndexInRoom(room));
       })
       .catch((error) => {
         history.push(Routes.home);
@@ -44,6 +47,7 @@ export const addPlayer =
       .addPlayer(roomId, playerId)
       .then((room) => {
         dispatch(setCurrentRoom(room));
+        dispatch(findPlayerIndexInRoom(room));
       })
       .catch((error) => {
         // history.push(Routes.home);

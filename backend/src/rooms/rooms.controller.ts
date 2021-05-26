@@ -59,6 +59,19 @@ export class RoomsController {
     return this.roomsService.addPlayer(params.id, params.playerId);
   }
 
+  @Patch(':id/player/connect/:playerId')
+  @UseFilters(new HttpExceptionFilter())
+  @UseInterceptors(
+    new TransformResponseInterceptor('Successfully connected this player'),
+  )
+  connectPlayer(@Param() params: PlayerParams) {
+    return this.roomsService.connectOrDisconnectPlayer(
+      params.id,
+      params.playerId,
+      true,
+    );
+  }
+
   @Patch(':id/player/remove/:playerId')
   @UseFilters(new HttpExceptionFilter())
   @UseInterceptors(

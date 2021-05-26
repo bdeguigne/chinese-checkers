@@ -1,9 +1,7 @@
 import React, { useContext, useState } from "react";
 import { EngineContext } from "../../context/engine-hook";
-import { PawnInfo } from "../../engine/default-board-coords";
 import { Pawn } from "../../engine/engine-types";
 import { Hex } from "../../engine/hex.lib";
-import { moveFinished } from "../../redux/game/game-slice";
 import {
   storeAvailableMovements,
   storeSelectedPawn,
@@ -15,6 +13,7 @@ interface Props {
   pawn: Pawn;
   showAvailableMovements(availableMovements: Hex[]): void;
   move(posPawn: Pawn): void;
+  moveFinishedHandler(): void;
 }
 
 export const DrawPawn = (props: Props) => {
@@ -25,6 +24,7 @@ export const DrawPawn = (props: Props) => {
   const currentHexPosition = useAppSelector(
     (state) => state.game.currentHexPosition
   );
+  const playerIndex = useAppSelector((state) => state.player.playerIndex);
 
   const [isHover, setIsHover] = useState(false);
   const engine = useContext(EngineContext);
@@ -42,11 +42,12 @@ export const DrawPawn = (props: Props) => {
         )
       )
     ) {
-      dispatch(moveFinished());
+      props.moveFinishedHandler();
       props.showAvailableMovements([]);
     } else if (
       !currentHexPosition &&
-      engine.playerCanMoveThisPawn(PawnInfo.playerTwo, props.pawn.hex)
+      playerIndex !== null &&
+      engine.playerCanMoveThisPawn(playerIndex, props.pawn.hex)
     ) {
       dispatch(storeSelectedPawn(props.pawn));
       const movements = engine.availableMovements(props.pawn.hex);
@@ -85,7 +86,8 @@ export const DrawPawn = (props: Props) => {
           setIsHover(true);
         } else if (
           !currentHexPosition &&
-          engine.playerCanMoveThisPawn(PawnInfo.playerTwo, props.pawn.hex)
+          playerIndex !== null &&
+          engine.playerCanMoveThisPawn(playerIndex, props.pawn.hex)
         ) {
           setIsHover(true);
         } else if (

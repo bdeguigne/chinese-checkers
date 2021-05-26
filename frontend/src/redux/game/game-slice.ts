@@ -6,6 +6,7 @@ interface GameState {
   selectedPawn: PawnAction | null;
   availableMovements: HexType[] | null;
   currentHexPosition: HexType | null;
+  currentPlayerIndex: number | null;
 }
 
 // Define the initial state using that type
@@ -13,6 +14,7 @@ const initialState: GameState = {
   selectedPawn: null,
   availableMovements: null,
   currentHexPosition: null,
+  currentPlayerIndex: null,
 };
 
 export const gameSlice = createSlice({
@@ -33,6 +35,9 @@ export const gameSlice = createSlice({
     setCurrentHexPosition: (state, action: PayloadAction<HexType>) => {
       state.currentHexPosition = action.payload;
     },
+    setCurrentPlayerIndex: (state, action: PayloadAction<number>) => {
+      state.currentPlayerIndex = action.payload;
+    },
   },
 });
 
@@ -41,6 +46,7 @@ export const {
   setAvailableMovements,
   moveFinished,
   setCurrentHexPosition,
+  setCurrentPlayerIndex,
 } = gameSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type

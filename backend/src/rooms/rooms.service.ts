@@ -10,6 +10,7 @@ import { PLAYER_MODEL, ROOM_MODEL } from 'src/constants';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { Room } from './interface/room.interface';
 import { Player } from 'src/players/interface/player.interface';
+import { AddPlayerDto } from './dto/player.dto';
 
 @Injectable()
 export class RoomsService {
@@ -57,10 +58,11 @@ export class RoomsService {
     if (!player) {
       throw new NotFoundException('Player not found');
     }
-    const doesRoomExist = await this.roomModel.exists({ _id: id });
-    if (!doesRoomExist) {
+    const room = await this.roomModel.findOne({ _id: id }).exec();
+    if (!room) {
       throw new NotFoundException('Room not found');
     }
+
     const findPlayerInRoomResult = await this.roomModel
       .findOne({
         _id: id,
@@ -71,7 +73,7 @@ export class RoomsService {
       const update = isCreator
         ? {
             $push: {
-              players: player,
+              players: { info: player, playerIndex: room.playersCount },
             },
             $inc: {
               playersCount: 1,
@@ -80,7 +82,7 @@ export class RoomsService {
           }
         : {
             $push: {
-              players: player,
+              players: { info: player, playerIndex: room.playersCount },
             },
             $inc: {
               playersCount: 1,
@@ -97,6 +99,53 @@ export class RoomsService {
         .exec();
     } else {
       throw new BadRequestException('This player is already in this room');
+    }
+  }
+
+  async connectOrDisconnectPlayer(
+    id: number,
+    playerId: number,
+    isConnect: boolean,
+  ): Promise<Room | null> {
+    const player = await this.playerModel.findById(playerId).exec();
+    if (!player) {
+      throw new NotFoundException('Player not found');
+    }
+    const doesRoomExist = await this.roomModel.exists({ _id: id });
+    if (!doesRoomExist) {
+      throw new NotFoundException('Room not found');
+    }
+    const findPlayerInRoomResult = await this.roomModel
+      .findOne({
+        _id: id,
+        'players.info._id': player._id,
+      })
+      .exec();
+    if (findPlayerInRoomResult) {
+      const findPlayerInConnectedList = await this.roomModel
+        .findOne({
+          _id: id,
+          connectedPlayers: playerId,
+        })
+        .exec();
+      if (findPlayerInConnectedList) {
+        throw new BadRequestException('This player is already connected');
+      }
+      return this.roomModel
+        .findOneAndUpdate(
+          {
+            _id: id,
+          },
+          {
+            $push: {
+              connectedPlayers: playerId,
+            },
+          },
+          { new: true },
+        )
+        .exec();
+    } else {
+      throw new BadRequestException('This player is not in this room');
     }
   }
 

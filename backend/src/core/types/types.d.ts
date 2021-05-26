@@ -6,3 +6,8 @@ type Avatar = {
 type JoinLobbyResponse = {
   playerName: string;
 };
+
+type StartGameReponse = {
+  roomId: string;
+  playerIndex?: number;
+};

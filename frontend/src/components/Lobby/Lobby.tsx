@@ -35,7 +35,9 @@ export const Lobby: FC<RouteComponentProps<TParams>> = (props) => {
     const players = room.players;
     const playersTmp: Player[] = [];
 
-    playersTmp.push(...players);
+    players.forEach((playerInfo) => {
+      playersTmp.push(playerInfo.info);
+    });
 
     for (let i = playersCount; i < 6; i++) {
       playersTmp.push({
@@ -63,7 +65,7 @@ export const Lobby: FC<RouteComponentProps<TParams>> = (props) => {
           event: lobbyEvents.joinLobby,
           roomId: room._id,
         });
-        socket.on("lobby", (message: LobbyResponse) => {
+        socket.on("lobby", (message: SocketResponse) => {
           if (message.event === lobbyEvents.joinLobby) {
             console.log("GET ROOM");
             dispatch(getRoom(props.match.params.id, props.history));

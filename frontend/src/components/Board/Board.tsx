@@ -8,29 +8,46 @@ import {
   moveFinished,
   setCurrentHexPosition,
 } from "../../redux/game/game-slice";
-import { PawnInfo } from "../../engine/default-board-coords";
 import {
   storeAvailableMovements,
   storeSelectedPawn,
 } from "../../redux/game/game-thunks";
-// import { useAppSelector } from "../../redux/hooks";
 
-interface Props {}
+interface Props {
+  moveFinished(board: number[][][]): void;
+  board: number[][][] | null;
+}
 
 export const Board = (props: Props) => {
-  const dispatch = useAppDispatch();
   const [currentPawns, setCurrentPawns] = useState<Pawn[]>([]);
   const [pawns, setPawns] = useState<Pawn[]>([]);
   const [checkMoveFinished, setCheckMoveFinished] = useState<Pawn>();
   const [isMoveNeighbor, setIsMoveNeighbor] = useState(false);
+
+  const dispatch = useAppDispatch();
   const storedSelectedPawn = useAppSelector((state) => state.game.selectedPawn);
+  const playerIndex = useAppSelector((state) => state.player.playerIndex);
 
   const engine = useContext(EngineContext);
 
   const updatePawns = (pawns: Pawn[]) => {
-    setPawns(engine.defaultBoard());
-    setCurrentPawns(engine.defaultBoard());
+    // setPawns(engine.defaultBoard());
+    // setCurrentPawns(engine.defaultBoard());
+    setPawns(pawns);
+    setCurrentPawns(pawns);
   };
+
+  const moveFinishedHandler = () => {
+    dispatch(moveFinished());
+    props.moveFinished(engine.boardCoordinates);
+  };
+
+  useEffect(() => {
+    if (props.board) {
+      engine.setBoardCoordinates(props.board);
+      updatePawns(engine.boardToPawns(props.board));
+    }
+  }, [engine, props.board]);
 
   useEffect(() => {
     if (updatePawns) {
@@ -42,14 +59,15 @@ export const Board = (props: Props) => {
   useEffect(() => {
     if (checkMoveFinished && pawns && currentPawns) {
       if (
-        engine.playerCanMoveThisPawn(PawnInfo.playerTwo, checkMoveFinished.hex)
+        playerIndex !== null &&
+        engine.playerCanMoveThisPawn(playerIndex, checkMoveFinished.hex)
       ) {
         dispatch(storeSelectedPawn(checkMoveFinished));
         const movements = engine.availableMovements(checkMoveFinished.hex);
         const availableMovements = movements.jumpCoords;
 
         if (availableMovements.length === 0 || isMoveNeighbor) {
-          dispatch(moveFinished());
+          moveFinishedHandler();
         } else {
           dispatch(storeAvailableMovements(availableMovements));
           showAvailableMovements(availableMovements);
@@ -100,6 +118,7 @@ export const Board = (props: Props) => {
               key={i}
               pawn={pawn}
               showAvailableMovements={showAvailableMovements}
+              moveFinishedHandler={moveFinishedHandler}
               move={move}
             />
           );
