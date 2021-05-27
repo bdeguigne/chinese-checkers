@@ -15,6 +15,7 @@ import { GameService } from './game.service';
 export enum lobbyEvents {
   joinLobby = 'join-lobby',
   play = 'play',
+  leaveLobby = 'leave-lobby',
 }
 
 export enum gameEvents {
@@ -23,6 +24,7 @@ export enum gameEvents {
   notReady = 'not-ready',
   moveFinished = 'move-finished',
   updateBoard = 'update-board',
+  nextPlayer = 'next-player',
 }
 
 @WebSocketGateway(8080)
@@ -34,16 +36,32 @@ export class GameGateway {
   server!: Server;
 
   @SubscribeMessage('lobby')
-  joinLobby(@MessageBody() data: LobbyDto, @ConnectedSocket() client: Socket) {
+  async joinLobby(
+    @MessageBody() data: LobbyDto,
+    @ConnectedSocket() client: Socket,
+  ) {
     if (data.event === lobbyEvents.joinLobby) {
-      client.join(data.roomId);
-      this.server.to(data.roomId).emit('lobby', {
+      await this.gameService.assignPlayerWithSocketId(
+        data.playerId,
+        data.roomId,
+        client.id,
+      );
+      console.log('joinLobby', data.playerId);
+      client.join(data.roomId.toString());
+      this.server.to(data.roomId.toString()).emit('lobby', {
         event: lobbyEvents.joinLobby,
       });
     }
     if (data.event === lobbyEvents.play) {
-      this.server.to(data.roomId).emit('lobby', {
+      await this.gameService.storeRoomInCache(data.roomId);
+      this.server.to(data.roomId.toString()).emit('lobby', {
         event: lobbyEvents.play,
+      });
+    }
+    if (data.event === lobbyEvents.leaveLobby) {
+      console.log('LEAVE LOBBY');
+      this.server.to(data.roomId.toString()).emit('lobby', {
+        event: lobbyEvents.joinLobby,
       });
     }
   }
@@ -63,6 +81,7 @@ export class GameGateway {
         this.server.to(data.roomId.toString()).emit('game', response);
       });
     }
+
     if (data.event === gameEvents.moveFinished) {
       if (!data.board) {
         throw new WsException('Incorrect data');
@@ -75,6 +94,18 @@ export class GameGateway {
           board: data.board,
         },
       });
+      this.gameService
+        .getNextPlayerFromCache(data.roomId)
+        .then((playerIndex) => {
+          console.log('Emit next player ', playerIndex);
+          this.server.to(data.roomId.toString()).emit('game', {
+            event: gameEvents.nextPlayer,
+            data: {
+              roomId: data.roomId,
+              playerIndex,
+            },
+          });
+        });
     }
   }
 }

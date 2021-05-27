@@ -27,12 +27,11 @@ export const Board = (props: Props) => {
   const dispatch = useAppDispatch();
   const storedSelectedPawn = useAppSelector((state) => state.game.selectedPawn);
   const playerIndex = useAppSelector((state) => state.player.playerIndex);
+  const currentPlayerIndex = useAppSelector((state) => state.game.currentPlayerIndex);
 
   const engine = useContext(EngineContext);
 
   const updatePawns = (pawns: Pawn[]) => {
-    // setPawns(engine.defaultBoard());
-    // setCurrentPawns(engine.defaultBoard());
     setPawns(pawns);
     setCurrentPawns(pawns);
   };
@@ -115,6 +114,7 @@ export const Board = (props: Props) => {
         pawns.map((pawn, i) => {
           return (
             <DrawPawn
+              isPlayerTurn={currentPlayerIndex === playerIndex}
               key={i}
               pawn={pawn}
               showAvailableMovements={showAvailableMovements}

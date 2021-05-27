@@ -3,6 +3,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+}
+
+.lobby__disconnect-container {
+  margin-right: auto;
+  margin-bottom: 16px;
 }
 
 .lobby-user-card--container {
@@ -31,4 +37,25 @@
   margin-right: auto;
   width: 300px;
   height: 50px;
+}
+
+.lobby__main-container {
+  position: relative;
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px 24px;
+  box-shadow: 0px 4px 45px -12px rgba(0, 0, 0, 0.25);
+  margin-left: 12px;
+  margin-right: 12px;
+  min-width: 400px;
+}
+
+.lobby__disconnect-button {
+  height: 50px;
+}
+
+.lobby__reload-container {
+  position: absolute;
+  top: 32px;
+  right: 16px;
 }

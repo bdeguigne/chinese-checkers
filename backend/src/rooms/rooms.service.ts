@@ -8,9 +8,8 @@ import {
 import { Model } from 'mongoose';
 import { PLAYER_MODEL, ROOM_MODEL } from 'src/constants';
 import { CreateRoomDto } from './dto/create-room.dto';
-import { Room } from './interface/room.interface';
+import { Room, RoomPlayerInfo } from './interface/room.interface';
 import { Player } from 'src/players/interface/player.interface';
-import { AddPlayerDto } from './dto/player.dto';
 
 @Injectable()
 export class RoomsService {
@@ -66,39 +65,47 @@ export class RoomsService {
     const findPlayerInRoomResult = await this.roomModel
       .findOne({
         _id: id,
-        'players._id': player._id,
       })
       .exec();
-    if (findPlayerInRoomResult == null) {
-      const update = isCreator
-        ? {
-            $push: {
-              players: { info: player, playerIndex: room.playersCount },
+    let playerPositionInArray = -1;
+    if (findPlayerInRoomResult) {
+      playerPositionInArray = this.findPlayerById(
+        findPlayerInRoomResult,
+        player._id,
+      );
+      if (playerPositionInArray === -1) {
+        const update = isCreator
+          ? {
+              $push: {
+                players: { info: player, playerIndex: room.playersCount },
+              },
+              $inc: {
+                playersCount: 1,
+              },
+              creatorName: player.name,
+            }
+          : {
+              $push: {
+                players: { info: player, playerIndex: room.playersCount },
+              },
+              $inc: {
+                playersCount: 1,
+              },
+            };
+        return this.roomModel
+          .findOneAndUpdate(
+            {
+              _id: id,
             },
-            $inc: {
-              playersCount: 1,
-            },
-            creatorName: player.name,
-          }
-        : {
-            $push: {
-              players: { info: player, playerIndex: room.playersCount },
-            },
-            $inc: {
-              playersCount: 1,
-            },
-          };
-      return this.roomModel
-        .findOneAndUpdate(
-          {
-            _id: id,
-          },
-          update,
-          { new: true },
-        )
-        .exec();
+            update,
+            { new: true },
+          )
+          .exec();
+      } else {
+        throw new BadRequestException('This player is already in this room');
+      }
     } else {
-      throw new BadRequestException('This player is already in this room');
+      throw new NotFoundException('Room not found');
     }
   }
 
@@ -128,19 +135,28 @@ export class RoomsService {
           connectedPlayers: playerId,
         })
         .exec();
-      if (findPlayerInConnectedList) {
+      if (isConnect === true && findPlayerInConnectedList) {
         throw new BadRequestException('This player is already connected');
+      }
+      if (isConnect === false && !findPlayerInConnectedList) {
+        throw new BadRequestException('This player is not connected');
       }
       return this.roomModel
         .findOneAndUpdate(
           {
             _id: id,
           },
-          {
-            $push: {
-              connectedPlayers: playerId,
-            },
-          },
+          isConnect
+            ? {
+                $push: {
+                  connectedPlayers: playerId,
+                },
+              }
+            : {
+                $pull: {
+                  connectedPlayers: playerId,
+                },
+              },
           { new: true },
         )
         .exec();
@@ -160,7 +176,32 @@ export class RoomsService {
     }
   }
 
-  async removePlayer(id: number, playerId: number): Promise<Player> {
+  findPlayerById(room: Room, playerId: number): number {
+    for (let i = 0; i < room.players.length; i++) {
+      console.log('PLAYER ID', playerId);
+      console.log('ROOM ID', room.players[i].info._id);
+      if (room.players[i].info._id == playerId.toString()) {
+        console.log('TRUE');
+        return i;
+      }
+    }
+    console.log('FALSE');
+    return -1;
+  }
+
+  updatePlayerIndexWhenPlayersChange(
+    removePlayerIndex: number,
+    players: RoomPlayerInfo[],
+  ): RoomPlayerInfo[] {
+    players.forEach((player) => {
+      if (player.playerIndex > removePlayerIndex) {
+        player.playerIndex -= 1;
+      }
+    });
+    return players;
+  }
+
+  async removePlayer(id: number, playerId: number): Promise<Room> {
     const player = await this.playerModel.findById(playerId).exec();
     if (!player) {
       throw new NotFoundException('Player not found');
@@ -172,30 +213,38 @@ export class RoomsService {
     const findPlayerInRoomResult = await this.roomModel
       .findOne({
         _id: id,
-        'players._id': player._id,
       })
       .exec();
-
+    let playerPositionInArray = -1;
     if (findPlayerInRoomResult) {
-      await this.roomModel
-        .updateOne(
-          { _id: id },
-          {
-            $pull: {
-              players: {
-                _id: player._id,
-              },
-            },
-            $inc: {
-              playersCount: -1,
-            },
-          },
-        )
-        .exec();
-    } else {
-      throw new BadRequestException('This player was not found in this room');
+      playerPositionInArray = this.findPlayerById(
+        findPlayerInRoomResult,
+        player._id,
+      );
+      if (playerPositionInArray !== -1) {
+        const removePlayerIndex =
+          findPlayerInRoomResult.players[playerPositionInArray].playerIndex;
+        findPlayerInRoomResult.players.splice(playerPositionInArray, 1);
+        findPlayerInRoomResult.playersCount =
+          findPlayerInRoomResult.playersCount - 1;
+
+        findPlayerInRoomResult.players =
+          this.updatePlayerIndexWhenPlayersChange(
+            removePlayerIndex,
+            findPlayerInRoomResult.players,
+          );
+        await this.roomModel
+          .updateOne({ _id: id }, findPlayerInRoomResult, { upsert: true })
+          .exec();
+        console.log('remove player', findPlayerInRoomResult);
+        return findPlayerInRoomResult;
+      } else {
+        console.log('This player was not found in this room');
+        throw new BadRequestException('This player was not found in this room');
+      }
     }
-    return player;
+    console.log('Room not found');
+    throw new NotFoundException('Room not found');
   }
 
   async removeAll(): Promise<any> {

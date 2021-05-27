@@ -7,6 +7,7 @@ export const PlayersSchema = new mongoose.Schema(
       type: String,
       seed: String,
     },
+    gameId: String,
   },
   {
     versionKey: false,

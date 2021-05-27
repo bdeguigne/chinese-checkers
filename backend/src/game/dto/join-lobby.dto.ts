@@ -1,6 +1,7 @@
 export class LobbyDto {
   event!: string;
-  roomId!: string;
+  roomId!: number;
+  playerId!: number;
 }
 
 export class GameDto {

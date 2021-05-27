@@ -1,18 +1,20 @@
-import { Avatar, Button, Col, Row } from "antd";
+import { Avatar, Button, Col, Row, Tooltip } from "antd";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import "./styles/lobby.css";
 import "../core/styles/core-styles.css";
 import { RouteComponentProps } from "react-router-dom";
 import { FC, useContext, useEffect, useState } from "react";
-import { addPlayer, getRoom } from "../../redux/room/room-thunks";
+import { getRoom, removePlayer } from "../../redux/room/room-thunks";
 import { SocketContext } from "../../context/socket";
 import { Routes } from "../../App";
+import { LeftOutlined, ReloadOutlined } from "@ant-design/icons";
 
 type TParams = { id: string };
 
 enum lobbyEvents {
   joinLobby = "join-lobby",
   play = "play",
+  leaveLobby = "leave-lobby",
 }
 
 export const Lobby: FC<RouteComponentProps<TParams>> = (props) => {
@@ -20,6 +22,7 @@ export const Lobby: FC<RouteComponentProps<TParams>> = (props) => {
   const room = useAppSelector((state) => state.room.currentRoom);
   const hasJoin = useAppSelector((state) => state.room.hasJoin);
   const player = useAppSelector((state) => state.player.player);
+  const playerIndex = useAppSelector((state) => state.player.playerIndex);
 
   const socket = useContext(SocketContext);
 
@@ -43,15 +46,16 @@ export const Lobby: FC<RouteComponentProps<TParams>> = (props) => {
       playersTmp.push({
         _id: "placeholder",
         avatar: { seed: "", type: "" },
+        gameId: "",
         name: "placeholder",
       });
     }
     setPlayersData(playersTmp);
   };
 
-  const addPlayerToRoom = (player: Player) => {
-    dispatch(addPlayer(props.match.params.id, player._id, props.history));
-  };
+  // const addPlayerToRoom = (player: Player) => {
+  //   dispatch(addPlayer(props.match.params.id, player._id, props.history));
+  // };
 
   useEffect(() => {
     fillRoomWithPlaceholderPlayers(room);
@@ -64,10 +68,11 @@ export const Lobby: FC<RouteComponentProps<TParams>> = (props) => {
         socket.emit("lobby", {
           event: lobbyEvents.joinLobby,
           roomId: room._id,
+          playerId: player._id,
         });
         socket.on("lobby", (message: SocketResponse) => {
           if (message.event === lobbyEvents.joinLobby) {
-            console.log("GET ROOM");
+            // console.log("GET ROOM", message.data.players);
             dispatch(getRoom(props.match.params.id, props.history));
           }
           if (message.event === lobbyEvents.play) {
@@ -86,14 +91,8 @@ export const Lobby: FC<RouteComponentProps<TParams>> = (props) => {
     props.match.params.id,
     props.history,
     connectedToSocket,
+    player._id,
   ]);
-
-  useEffect(() => {
-    if (player._id !== "" && hasJoin === false) {
-      addPlayerToRoom(player);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [player, hasJoin]);
 
   const playButtonClicked = () => {
     socket.emit("lobby", {
@@ -102,52 +101,109 @@ export const Lobby: FC<RouteComponentProps<TParams>> = (props) => {
     });
   };
 
+  const leaveRoom = () => {
+    dispatch(
+      removePlayer(
+        props.match.params.id,
+        player._id,
+        props.history,
+        socket,
+        lobbyEvents.leaveLobby
+      )
+    );
+  };
+
   return (
     <div className="create-room__container">
-      <div className="content__container">
-        <Row gutter={16}>
-          {playersData.map((player, i) => {
-            if (player._id !== "placeholder") {
-              return (
-                <Col className="gutter-row" span={8} key={i}>
-                  <div className="lobby-user-card--container">
-                    <Avatar
-                      size={100}
-                      src={
-                        <img
-                          src={`https://avatars.dicebear.com/api/${player.avatar.type}/${player.avatar.seed}.svg`}
-                          alt="avatar"
-                        />
-                      }
-                    ></Avatar>
-                    <p>{player.name}</p>
-                  </div>
-                </Col>
-              );
-            } else {
-              return (
-                <Col className="gutter-row" span={8} key={i}>
-                  <div className="lobby-user-card--container">
-                    <Avatar
-                      size={100}
-                      src={<img src={"/assets/placeholder.png"} alt="avatar" />}
-                    ></Avatar>
-                    <p>Waiting for a player</p>
-                  </div>
-                </Col>
-              );
-            }
-          })}
-        </Row>
-
-        <div className="lobby__play-button__container">
+      <div className="content__container--transparent">
+        <div className="lobby__disconnect-container">
           <Button
-            type="primary"
-            className="lobby__play-button"
-            onClick={() => playButtonClicked()}
+            type="text"
+            icon={<LeftOutlined />}
+            className="lobby__disconnect-button"
+            onClick={leaveRoom}
           >
-            Play !
+            Leave this room
           </Button>
+        </div>
+        <div className="lobby__main-container">
+          <Row gutter={16}>
+            {playersData.map((player, i) => {
+              if (player._id !== "placeholder") {
+                return (
+                  <Col className="gutter-row" span={8} key={i}>
+                    <div className="lobby-user-card--container">
+                      <Avatar
+                        size={100}
+                        src={
+                          <img
+                            src={`https://avatars.dicebear.com/api/${player.avatar.type}/${player.avatar.seed}.svg`}
+                            alt="avatar"
+                          />
+                        }
+                      ></Avatar>
+                      <p>{player.name}</p>
+                    </div>
+                  </Col>
+                );
+              } else {
+                return (
+                  <Col className="gutter-row" span={8} key={i}>
+                    <div className="lobby-user-card--container">
+                      <Avatar
+                        size={100}
+                        src={
+                          <img src={"/assets/placeholder.png"} alt="avatar" />
+                        }
+                      ></Avatar>
+                      <p>Waiting for a player</p>
+                    </div>
+                  </Col>
+                );
+              }
+            })}
+          </Row>
+
+          <div className="lobby__play-button__container">
+            {player.gameId === room._id ? (
+              <Button
+                type="primary"
+                className="lobby__play-button"
+                onClick={() => playButtonClicked()}
+              >
+                Reconnect !
+              </Button>
+            ) : playerIndex === 0 ? (
+              <Button
+                type="primary"
+                className="lobby__play-button"
+                onClick={() => playButtonClicked()}
+              >
+                Play !
+              </Button>
+            ) : (
+              <Button
+                type="primary"
+                className="lobby__play-button"
+                disabled={true}
+              >
+                Waiting for the host
+              </Button>
+            )}
+          </div>
+
+          <div className="lobby__reload-container">
+            <Tooltip title="Reload players" className="avatar__reload-button">
+              <Button
+                type="ghost"
+                shape="circle"
+                icon={<ReloadOutlined />}
+                onClick={() =>
+                  dispatch(getRoom(props.match.params.id, props.history))
+                }
+              />
+            </Tooltip>
+          </div>
         </div>
       </div>
     </div>

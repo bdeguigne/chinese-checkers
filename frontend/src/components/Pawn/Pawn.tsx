@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import { EngineContext } from "../../context/engine-hook";
 import { Pawn } from "../../engine/engine-types";
 import { Hex } from "../../engine/hex.lib";
+import { message } from "antd";
 import {
   storeAvailableMovements,
   storeSelectedPawn,
@@ -11,6 +12,7 @@ import { hexTypeArrayToHexArray } from "../core/convert";
 
 interface Props {
   pawn: Pawn;
+  isPlayerTurn: boolean;
   showAvailableMovements(availableMovements: Hex[]): void;
   move(posPawn: Pawn): void;
   moveFinishedHandler(): void;
@@ -68,40 +70,42 @@ export const DrawPawn = (props: Props) => {
     }
   };
 
+  const mouseEnter = () => {
+    if (
+      storedAvailableMovements !== null &&
+      currentHexPosition &&
+      engine.isHexEqual(
+        props.pawn.hex,
+        new Hex(
+          currentHexPosition.q,
+          currentHexPosition.r,
+          currentHexPosition.s
+        )
+      )
+    ) {
+      setIsHover(true);
+    } else if (
+      !currentHexPosition &&
+      playerIndex !== null &&
+      engine.playerCanMoveThisPawn(playerIndex, props.pawn.hex)
+    ) {
+      setIsHover(true);
+    } else if (
+      storedAvailableMovements &&
+      engine.playerCanGoToThisHex(
+        hexTypeArrayToHexArray(storedAvailableMovements),
+        props.pawn.hex
+      )
+    ) {
+      setIsHover(true);
+    }
+  };
+
   return (
     <circle
-      onMouseEnter={() => {
-        if (
-          storedAvailableMovements !== null &&
-          currentHexPosition &&
-          engine.isHexEqual(
-            props.pawn.hex,
-            new Hex(
-              currentHexPosition.q,
-              currentHexPosition.r,
-              currentHexPosition.s
-            )
-          )
-        ) {
-          setIsHover(true);
-        } else if (
-          !currentHexPosition &&
-          playerIndex !== null &&
-          engine.playerCanMoveThisPawn(playerIndex, props.pawn.hex)
-        ) {
-          setIsHover(true);
-        } else if (
-          storedAvailableMovements &&
-          engine.playerCanGoToThisHex(
-            hexTypeArrayToHexArray(storedAvailableMovements),
-            props.pawn.hex
-          )
-        ) {
-          setIsHover(true);
-        }
-      }}
+      onMouseEnter={props.isPlayerTurn ? mouseEnter : () => {}}
       onMouseLeave={() => setIsHover(false)}
-      onClick={onClicked}
+      onClick={props.isPlayerTurn ? onClicked : () => {message.error("It's not your turn")}}
       cx={props.pawn.x}
       cy={props.pawn.y}
       r="12"

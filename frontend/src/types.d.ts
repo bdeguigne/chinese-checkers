@@ -20,6 +20,7 @@ type Player = {
   _id: string;
   name: string;
   avatar: Avatar;
+  gameId: string;
 };
 
 type Avatar = {

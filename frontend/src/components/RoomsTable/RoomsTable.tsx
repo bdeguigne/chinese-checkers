@@ -1,7 +1,7 @@
 import { Table, Button, Tooltip } from "antd";
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { getAllRooms } from "../../redux/room/room-thunks";
+import { addPlayer, getAllRooms } from "../../redux/room/room-thunks";
 import "./styles/rooms-table.css";
 import { ReloadOutlined } from "@ant-design/icons";
 import { RouteChildrenProps } from "react-router-dom";
@@ -9,13 +9,22 @@ import { Routes } from "../../App";
 
 export const RoomsTable: FC<RouteChildrenProps> = (props) => {
   const dispatch = useAppDispatch();
+  const [roomsData, setRoomsData] = useState<Room[]>([]);
   const rooms = useAppSelector((state) => state.room.rooms);
+  const player = useAppSelector((state) => state.player.player);
 
   useEffect(() => {
-  
     dispatch(getAllRooms());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const results = rooms.map((room) => ({
+      key: room._id,
+      ...room,
+    }));
+    setRoomsData(results);
+  }, [rooms]);
 
   const onRefreshClicked = () => dispatch(getAllRooms());
 
@@ -48,6 +57,7 @@ export const RoomsTable: FC<RouteChildrenProps> = (props) => {
             onRow={(record, rowIndex) => {
               return {
                 onClick: (event) => {
+                  dispatch(addPlayer(record._id, player._id, props.history));
                   props.history.push(Routes.room + "/" + record._id);
                 }, // click row
                 onDoubleClick: (event) => {}, // double click row
@@ -58,7 +68,7 @@ export const RoomsTable: FC<RouteChildrenProps> = (props) => {
             }}
             scroll={{ y: 260 }}
             columns={columns}
-            dataSource={rooms}
+            dataSource={roomsData}
             pagination={false}
             tableLayout="auto"
           />

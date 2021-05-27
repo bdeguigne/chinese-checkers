@@ -1,0 +1,22 @@
+.players-table__item-container {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  border-left: 4px solid transparent;
+
+  span {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  &--selected {
+    @extend .players-table__item-container;
+    border-left: 4px solid red;
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+  }
+}
+
+.players-table__divider {
+  margin: 0;
+}

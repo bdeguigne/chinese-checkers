@@ -5,6 +5,7 @@ import type { RootState } from "../store";
 interface PlayerState {
   player: Player;
   playerIndex: number | null;
+  guestMode: boolean;
 }
 
 // Define the initial state using that type
@@ -12,12 +13,14 @@ const initialState: PlayerState = {
   player: {
     _id: "",
     name: "",
+    gameId: "",
     avatar: {
       seed: "",
       type: "",
     },
   },
   playerIndex: null,
+  guestMode: false,
 };
 
 export const playerSlice = createSlice({
@@ -30,10 +33,23 @@ export const playerSlice = createSlice({
     setPlayerIndex: (state, action: PayloadAction<number>) => {
       state.playerIndex = action.payload;
     },
+    activateGuestMode: (state) => {
+      state.player = {
+        _id: "",
+        name: "",
+        gameId: "",
+        avatar: {
+          seed: "",
+          type: "",
+        },
+      };
+      state.guestMode = true;
+    },
   },
 });
 
-export const { setPlayer, setPlayerIndex } = playerSlice.actions;
+export const { setPlayer, setPlayerIndex, activateGuestMode } =
+  playerSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectPlayer = (state: RootState) => state.player.player;

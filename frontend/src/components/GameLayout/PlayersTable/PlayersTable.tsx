@@ -1,33 +1,30 @@
-import { Table } from "antd";
+import { Divider } from "antd";
 import { useAppSelector } from "../../../redux/hooks";
 import { GameAvatar } from "../../GameAvatar/GameAvatar";
-
-const columns = [
-  {
-    title: "Avatar",
-    dataIndex: "info",
-    key: "avatar",
-    render: (player: Player) => <GameAvatar seed={player.avatar.seed} />,
-  },
-  {
-    title: "name",
-    dataIndex: "info",
-    key: "name",
-    render: (player: Player) => player.name,
-  },
-];
+import "./styles/PlayersTable.css";
 
 interface Props {}
 
 export const PlayersTable = (props: Props) => {
   const players = useAppSelector((state) => state.room.currentRoom.players);
+  const playerIndex = useAppSelector((state) => state.game.currentPlayerIndex);
 
   return (
-    <Table
-      columns={columns}
-      dataSource={players}
-      pagination={false}
-      showHeader={false}
-    />
+    <>
+      {players.map((player, i) => {
+        return (
+          <div>
+            <div
+              key={player.info._id}
+              className={i === playerIndex ? "players-table__item-container--selected" : "players-table__item-container"}
+            >
+              <GameAvatar seed={player.info.avatar.seed} />
+              <span>{player.info.name}</span>
+            </div>
+            <Divider className="players-table__divider" />
+          </div>
+        );
+      })}
+    </>
   );
 };

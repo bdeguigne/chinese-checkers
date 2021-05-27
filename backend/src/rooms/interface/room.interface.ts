@@ -1,7 +1,7 @@
 import { Document } from 'mongoose';
 import { Player } from 'src/players/interface/player.interface';
 
-type RoomPlayerInfo = {
+export type RoomPlayerInfo = {
   info: Player;
   playerIndex: number;
 };

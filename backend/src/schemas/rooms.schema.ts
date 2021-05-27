@@ -6,12 +6,12 @@ export const RoomSchema = new Schema(
       type: Number,
       default: 0,
     },
-    players: [
-      {
-        info: Object,
-        playerIndex: Number,
-      },
-    ],
+    players: Array,
+    // {
+    //   info:
+    //   playerIndex: Number,
+    // },
+
     creatorName: {
       type: String,
       default: '',

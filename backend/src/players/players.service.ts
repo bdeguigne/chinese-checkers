@@ -43,4 +43,26 @@ export class PlayersService {
   async removeAll(): Promise<any> {
     return await this.playerModel.deleteMany({}).exec();
   }
+
+  async addGame(playerId: number, roomId: number): Promise<Player> {
+    const player = await this.playerModel
+      .findByIdAndUpdate({ _id: playerId }, { $set: { gameId: roomId } })
+      .exec();
+
+    if (player == null) {
+      throw new NotFoundException('Cannot set a game for this player');
+    } else {
+      return player;
+    }
+  }
+
+  async isPlayerIsInGame(playerId: number): Promise<number | null> {
+    const player = await this.playerModel.findById(playerId);
+    if (player) {
+      if (player.gameId) {
+        return player.gameId;
+      }
+    }
+    return null;
+  }
 }

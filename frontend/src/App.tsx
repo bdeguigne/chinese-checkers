@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
 import "./App.less";
 import { RoomsTable } from "./components/RoomsTable/RoomsTable";
@@ -7,6 +7,8 @@ import HomePage from "./components/HomePage/HomePage";
 import { SocketContext, socket } from "./context/socket";
 import { EngineContext, engine } from "./context/engine-hook";
 import { GameLayout } from "./components/GameLayout/GameLayout";
+import { useAppDispatch } from "./redux/hooks";
+import { getPlayer } from "./redux/player/player-thunks";
 
 export enum Routes {
   rooms = "/rooms",
@@ -16,6 +18,15 @@ export enum Routes {
 }
 
 const App: FC = () => {
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    const playerId = localStorage.getItem("playerId");
+    if (playerId) {
+      dispatch(getPlayer(playerId));
+      console.log("PLAYER ID IN STORAGE", playerId);
+    }
+  }, [dispatch]);
+
   return (
     <SocketContext.Provider value={socket}>
       <EngineContext.Provider value={engine}>

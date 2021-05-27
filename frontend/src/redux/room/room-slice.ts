@@ -31,10 +31,19 @@ export const roomSlice = createSlice({
       state.currentRoom = action.payload;
       state.hasJoin = true;
     },
+    leaveRoom: (state) => {
+      state.currentRoom = {
+        _id: "",
+        creatorName: "",
+        players: [],
+        playersCount: 0,
+      };
+      state.hasJoin = false;
+    },
   },
 });
 
-export const { setRooms, setCurrentRoom } = roomSlice.actions;
+export const { setRooms, setCurrentRoom, leaveRoom } = roomSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectRooms = (state: RootState) => state.room.rooms;

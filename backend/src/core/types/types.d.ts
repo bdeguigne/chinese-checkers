@@ -11,3 +11,9 @@ type StartGameReponse = {
   roomId: string;
   playerIndex?: number;
 };
+
+type PlayerSocket = {
+  roomId: number;
+  playerId: number;
+  socketId: string;
+};

@@ -1,6 +1,6 @@
 import { AppThunk } from "../store";
 import * as roomService from "./room-service";
-import { setCurrentRoom, setRooms } from "./room-slice";
+import { leaveRoom, setCurrentRoom, setRooms } from "./room-slice";
 import { History } from "history";
 import { Routes } from "../../App";
 import { findPlayerIndexInRoom } from "../player/player-thunks";
@@ -46,8 +46,33 @@ export const addPlayer =
     roomService
       .addPlayer(roomId, playerId)
       .then((room) => {
-        dispatch(setCurrentRoom(room));
         dispatch(findPlayerIndexInRoom(room));
+        dispatch(setCurrentRoom(room));
+      })
+      .catch((error) => {
+        // history.push(Routes.home);
+        console.log("get room error", error);
+      });
+  };
+
+export const removePlayer =
+  (
+    roomId: string,
+    playerId: string,
+    history: History,
+    socket: any,
+    event: string
+  ): AppThunk =>
+  async (dispatch) => {
+    roomService
+      .removePlayer(roomId, playerId)
+      .then((room) => {
+        history.push(Routes.home);
+        dispatch(leaveRoom());
+        socket.emit("lobby", {
+          event: event,
+          roomId: room._id,
+        });
       })
       .catch((error) => {
         // history.push(Routes.home);

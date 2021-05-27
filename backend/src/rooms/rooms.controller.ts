@@ -72,6 +72,19 @@ export class RoomsController {
     );
   }
 
+  @Patch(':id/player/disconnect/:playerId')
+  @UseFilters(new HttpExceptionFilter())
+  @UseInterceptors(
+    new TransformResponseInterceptor('Successfully disconnected this player'),
+  )
+  disconnectPlayer(@Param() params: PlayerParams) {
+    return this.roomsService.connectOrDisconnectPlayer(
+      params.id,
+      params.playerId,
+      false,
+    );
+  }
+
   @Patch(':id/player/remove/:playerId')
   @UseFilters(new HttpExceptionFilter())
   @UseInterceptors(

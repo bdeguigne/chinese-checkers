@@ -1,4 +1,7 @@
-export const create = async (player: string, avatar: Avatar): Promise<Player> => {
+export const create = async (
+  player: string,
+  avatar: Avatar
+): Promise<Player> => {
   const response = await fetch("http://localhost:3000/players/", {
     method: "POST",
     headers: {
@@ -6,7 +9,7 @@ export const create = async (player: string, avatar: Avatar): Promise<Player> =>
     },
     body: JSON.stringify({
       name: player,
-      avatar
+      avatar,
     }),
   });
   const apiResponse: ApiResponse<Player> = await response.json();
@@ -23,6 +26,26 @@ export const create = async (player: string, avatar: Avatar): Promise<Player> =>
   return {
     _id: apiResponse.data._id,
     name: apiResponse.data.name,
-    avatar: apiResponse.data.avatar
+    gameId: "",
+    avatar: apiResponse.data.avatar,
   };
+};
+
+export const getPlayer = async (playerId: string): Promise<Player> => {
+  // localhost:3000/players/60a324b5d7f59de0d51246c6
+  const response = await fetch("http://localhost:3000/players/" + playerId, {
+    method: "GET",
+  });
+  const apiResponse: ApiResponse<Player> = await response.json();
+
+  console.log(apiResponse);
+
+  if (!apiResponse?.success) {
+    const error = new Error(apiResponse.message);
+    return Promise.reject(error);
+  }
+  if (!response.ok) {
+    return Promise.reject("something went wrong");
+  }
+  return apiResponse.data;
 };
