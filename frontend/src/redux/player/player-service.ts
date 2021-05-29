@@ -2,7 +2,11 @@ export const create = async (
   player: string,
   avatar: Avatar
 ): Promise<Player> => {
-  const response = await fetch("http://localhost:3000/players/", {
+  let apiAddr = "";
+  if (process.env.REACT_APP_API_ADDRESS) {
+    apiAddr = process.env.REACT_APP_API_ADDRESS;
+  }
+  const response = await fetch(`${apiAddr}/players/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -34,8 +38,11 @@ export const create = async (
 };
 
 export const getPlayer = async (playerId: string): Promise<Player> => {
-  // localhost:3000/players/60a324b5d7f59de0d51246c6
-  const response = await fetch("http://localhost:3000/players/" + playerId, {
+  let apiAddr = "";
+  if (process.env.REACT_APP_API_ADDRESS) {
+    apiAddr = process.env.REACT_APP_API_ADDRESS;
+  }
+  const response = await fetch(`${apiAddr}/players/` + playerId, {
     method: "GET",
   });
   const apiResponse: ApiResponse<Player> = await response.json();
@@ -56,12 +63,13 @@ export const playerWinOrLose = async (
   playerId: string,
   state: string
 ): Promise<Player> => {
-  const response = await fetch(
-    "http://localhost:3000/players/" + playerId + "/" + state,
-    {
-      method: "PATCH",
-    }
-  );
+  let apiAddr = "";
+  if (process.env.REACT_APP_API_ADDRESS) {
+    apiAddr = process.env.REACT_APP_API_ADDRESS;
+  }
+  const response = await fetch(`${apiAddr}/players/` + playerId + "/" + state, {
+    method: "PATCH",
+  });
   const apiResponse: ApiResponse<Player> = await response.json();
 
   if (!apiResponse?.success) {

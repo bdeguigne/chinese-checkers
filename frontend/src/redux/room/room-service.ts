@@ -1,5 +1,9 @@
 export const getAllRooms = async (): Promise<Room[]> => {
-  const response = await fetch("http://localhost:3000/rooms/", {
+  let apiAddr = "";
+  if (process.env.REACT_APP_API_ADDRESS) {
+    apiAddr = process.env.REACT_APP_API_ADDRESS;
+  }
+  const response = await fetch(`${apiAddr}/rooms/`, {
     method: "GET",
   });
   const apiResponse: ApiResponse<Room[]> = await response.json();
@@ -20,7 +24,11 @@ export const getAllRooms = async (): Promise<Room[]> => {
 };
 
 export const create = async (playerId: string): Promise<Room> => {
-  const response = await fetch("http://localhost:3000/rooms/", {
+  let apiAddr = "";
+  if (process.env.REACT_APP_API_ADDRESS) {
+    apiAddr = process.env.REACT_APP_API_ADDRESS;
+  }
+  const response = await fetch(`${apiAddr}/rooms/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -44,7 +52,11 @@ export const create = async (playerId: string): Promise<Room> => {
 };
 
 export const getRoom = async (roomId: string): Promise<Room> => {
-  const response = await fetch("http://localhost:3000/rooms/" + roomId, {
+  let apiAddr = "";
+  if (process.env.REACT_APP_API_ADDRESS) {
+    apiAddr = process.env.REACT_APP_API_ADDRESS;
+  }
+  const response = await fetch(`${apiAddr}/rooms/` + roomId, {
     method: "GET",
   });
   const apiResponse: ApiResponse<Room> = await response.json();
@@ -65,8 +77,12 @@ export const addPlayer = async (
   roomId: string,
   playerId: string
 ): Promise<Room> => {
+  let apiAddr = "";
+  if (process.env.REACT_APP_API_ADDRESS) {
+    apiAddr = process.env.REACT_APP_API_ADDRESS;
+  }
   const response = await fetch(
-    "http://localhost:3000/rooms/" + roomId + "/player/add/" + playerId,
+    `${apiAddr}/rooms/` + roomId + "/player/add/" + playerId,
     {
       method: "PATCH",
     }
@@ -89,8 +105,12 @@ export const removePlayer = async (
   roomId: string,
   playerId: string
 ): Promise<Room> => {
+  let apiAddr = "";
+  if (process.env.REACT_APP_API_ADDRESS) {
+    apiAddr = process.env.REACT_APP_API_ADDRESS;
+  }
   const response = await fetch(
-    "http://localhost:3000/rooms/" + roomId + "/player/remove/" + playerId,
+    `${apiAddr}/rooms/` + roomId + "/player/remove/" + playerId,
     {
       method: "PATCH",
     }

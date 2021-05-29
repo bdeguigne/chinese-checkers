@@ -13,7 +13,7 @@ import { GameService } from 'src/game/game.service';
 import { PlayersService } from 'src/players/players.service';
 
 @Injectable()
-@WebSocketGateway(8080)
+@WebSocketGateway()
 export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,

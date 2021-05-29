@@ -28,7 +28,7 @@ export enum gameEvents {
   playerWins = 'player-wins',
 }
 
-@WebSocketGateway(8080)
+@WebSocketGateway()
 @UseFilters(new AllExceptionsFilter())
 export class GameGateway {
   constructor(private readonly gameService: GameService) {}
