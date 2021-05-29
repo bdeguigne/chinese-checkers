@@ -8,6 +8,7 @@ import {
   Delete,
   UseFilters,
   UseInterceptors,
+  NotFoundException,
 } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto } from './dto/create-room.dto';
@@ -16,6 +17,7 @@ import { FindOneParams } from 'src/core/validators/find-one-params';
 import { HttpExceptionFilter } from 'src/core/http-expection.filters';
 import { TransformResponseInterceptor } from 'src/core/transform-response.interceptor';
 import { PlayerParams } from './params/player.params';
+import { StoreBoardDto } from './dto/store-board.dto';
 
 @Controller('rooms')
 export class RoomsController {
@@ -46,6 +48,19 @@ export class RoomsController {
   )
   findOne(@Param() params: FindOneParams) {
     return this.roomsService.findOne(params.id);
+  }
+
+  @Get(':id/board')
+  @UseFilters(new HttpExceptionFilter())
+  @UseInterceptors(
+    new TransformResponseInterceptor('Successfully fetched this room'),
+  )
+  async findBoard(@Param() params: FindOneParams) {
+    const board = await this.roomsService.findBoard(params.id);
+    if (!board) {
+      throw new NotFoundException();
+    }
+    return board;
   }
 
   @Patch(':id/player/add/:playerId')
@@ -94,6 +109,18 @@ export class RoomsController {
   )
   removePlayer(@Param() params: PlayerParams) {
     return this.roomsService.removePlayer(params.id, params.playerId);
+  }
+
+  @Patch(':id/board')
+  @UseFilters(new HttpExceptionFilter())
+  @UseInterceptors(
+    new TransformResponseInterceptor('Successfully store board in this room'),
+  )
+  storeBoard(
+    @Param() params: PlayerParams,
+    @Body() storeBoardDto: StoreBoardDto,
+  ) {
+    return this.roomsService.storeBoardInDb(params.id, storeBoardDto.board);
   }
 
   @Delete('all')

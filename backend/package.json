@@ -27,13 +27,16 @@
     "@nestjs/platform-express": "^7.6.15",
     "@nestjs/platform-socket.io": "^7.6.17",
     "@nestjs/platform-ws": "^7.6.17",
+    "@nestjs/swagger": "^4.8.0",
     "@nestjs/websockets": "^7.6.17",
     "@types/uuid": "^8.3.0",
     "cache-manager": "^3.4.3",
+    "dotenv": "^10.0.0",
     "mongoose": "^5.12.9",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.6",
+    "swagger-ui-express": "^4.1.6",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

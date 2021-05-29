@@ -48,6 +48,19 @@ export class RoomsService {
     }
   }
 
+  async findBoard(roomId: number): Promise<number[][][] | null> {
+    const room = await this.roomModel.findById(roomId).exec();
+    if (!room) {
+      return null;
+    } else {
+      if (room.board.length === 0) {
+        return null;
+      } else {
+        return room.board;
+      }
+    }
+  }
+
   async addPlayer(
     id: number,
     playerId: number,
@@ -199,6 +212,26 @@ export class RoomsService {
       }
     });
     return players;
+  }
+
+  async storeBoardInDb(
+    roomId: number,
+    board: number[][][],
+  ): Promise<Room | null> {
+    const doesRoomExist = await this.roomModel.exists({ _id: roomId });
+    if (!doesRoomExist) {
+      throw new NotFoundException('Room not found');
+    }
+    return await this.roomModel.findOneAndUpdate(
+      {
+        _id: roomId,
+      },
+      {
+        $set: {
+          board,
+        },
+      },
+    );
   }
 
   async removePlayer(id: number, playerId: number): Promise<Room> {

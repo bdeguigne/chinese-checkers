@@ -32,6 +32,7 @@ export const DrawPawn = (props: Props) => {
   const engine = useContext(EngineContext);
 
   const onClicked = () => {
+    engine.printHex(props.pawn.hex);
     if (
       storedAvailableMovements !== null &&
       currentHexPosition &&
@@ -105,7 +106,13 @@ export const DrawPawn = (props: Props) => {
     <circle
       onMouseEnter={props.isPlayerTurn ? mouseEnter : () => {}}
       onMouseLeave={() => setIsHover(false)}
-      onClick={props.isPlayerTurn ? onClicked : () => {message.error("It's not your turn")}}
+      onClick={
+        props.isPlayerTurn
+          ? onClicked
+          : () => {
+              message.error("It's not your turn");
+            }
+      }
       cx={props.pawn.x}
       cy={props.pawn.y}
       r="12"

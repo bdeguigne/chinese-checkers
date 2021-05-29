@@ -6,6 +6,8 @@ interface RoomState {
   hasJoin: boolean;
   rooms: Room[];
   currentRoom: Room;
+  hasJoinWithHomepage: boolean;
+  redirectWithLink: boolean;
 }
 
 // Define the initial state using that type
@@ -18,6 +20,8 @@ const initialState: RoomState = {
     players: [],
     playersCount: 0,
   },
+  hasJoinWithHomepage: false,
+  redirectWithLink: false,
 };
 
 export const roomSlice = createSlice({
@@ -40,10 +44,17 @@ export const roomSlice = createSlice({
       };
       state.hasJoin = false;
     },
+    setHasJoinWithHomePage: (state, action: PayloadAction<boolean>) => {
+      state.hasJoinWithHomepage = action.payload;
+    },
+    setRedirectWithLink: (state, action: PayloadAction<boolean>) => {
+      state.redirectWithLink = action.payload;
+    },
   },
 });
 
-export const { setRooms, setCurrentRoom, leaveRoom } = roomSlice.actions;
+export const { setRooms, setCurrentRoom, leaveRoom, setHasJoinWithHomePage, setRedirectWithLink } =
+  roomSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectRooms = (state: RootState) => state.room.rooms;

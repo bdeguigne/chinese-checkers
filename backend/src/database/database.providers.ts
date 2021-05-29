@@ -5,8 +5,13 @@ export const databaseProviders = [
   {
     provide: DATABASE_CONNECTION,
     useFactory: (): Promise<typeof mongoose> =>
-      mongoose.connect('mongodb://localhost/chinese-checkers-nest', {
-        useFindAndModify: false,
-      }),
+      mongoose.connect(
+        `mongodb+srv://${process.env.MONGODB}?retryWrites=true&w=majority`,
+        {
+          useFindAndModify: false,
+          useUnifiedTopology: true,
+          useNewUrlParser: true,
+        },
+      ),
   },
 ];

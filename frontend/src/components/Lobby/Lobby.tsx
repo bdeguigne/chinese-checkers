@@ -8,6 +8,7 @@ import { getRoom, removePlayer } from "../../redux/room/room-thunks";
 import { SocketContext } from "../../context/socket";
 import { Routes } from "../../App";
 import { LeftOutlined, ReloadOutlined } from "@ant-design/icons";
+import { setRedirectWithLink } from "src/redux/room/room-slice";
 
 type TParams = { id: string };
 
@@ -23,6 +24,9 @@ export const Lobby: FC<RouteComponentProps<TParams>> = (props) => {
   const hasJoin = useAppSelector((state) => state.room.hasJoin);
   const player = useAppSelector((state) => state.player.player);
   const playerIndex = useAppSelector((state) => state.player.playerIndex);
+  const hasJoinWithHomePage = useAppSelector(
+    (state) => state.room.hasJoinWithHomepage
+  );
 
   const socket = useContext(SocketContext);
 
@@ -48,6 +52,8 @@ export const Lobby: FC<RouteComponentProps<TParams>> = (props) => {
         avatar: { seed: "", type: "" },
         gameId: "",
         name: "placeholder",
+        win: 0,
+        lose: 0
       });
     }
     setPlayersData(playersTmp);
@@ -59,7 +65,17 @@ export const Lobby: FC<RouteComponentProps<TParams>> = (props) => {
 
   useEffect(() => {
     fillRoomWithPlaceholderPlayers(room);
-  }, [room]);
+    if (hasJoinWithHomePage === false) {
+      dispatch(setRedirectWithLink(true));
+      props.history.push(Routes.home);
+      // if (player.name !== "") {
+      //   dispatch(addPlayer(room._id, player._id, props.history));
+      // } else {
+      //   console.log("Redirect player to special page to create perso")
+      // }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room, hasJoinWithHomePage, player]);
 
   useEffect(() => {
     if (hasJoin === true && connectedToSocket === false) {
@@ -174,13 +190,26 @@ export const Lobby: FC<RouteComponentProps<TParams>> = (props) => {
                 Reconnect !
               </Button>
             ) : playerIndex === 0 ? (
-              <Button
-                type="primary"
-                className="lobby__play-button"
-                onClick={() => playButtonClicked()}
-              >
-                Play !
-              </Button>
+              room.playersCount === 2 ||
+              room.playersCount === 4 ||
+              room.playersCount === 6 ? (
+                <Button
+                  type="primary"
+                  className="lobby__play-button"
+                  onClick={() => playButtonClicked()}
+                >
+                  Play !
+                </Button>
+              ) : (
+                <Button
+                  disabled={true}
+                  type="primary"
+                  className="lobby__play-button"
+                  onClick={() => playButtonClicked()}
+                >
+                  You can play only with two, four or six players
+                </Button>
+              )
             ) : (
               <Button
                 type="primary"

@@ -17,6 +17,7 @@ export const RoomSchema = new Schema(
       default: '',
     },
     connectedPlayers: [String],
+    board: Array,
   },
   {
     versionKey: false,

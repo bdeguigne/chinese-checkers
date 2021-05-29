@@ -9,4 +9,5 @@ export class GameDto {
   roomId!: number;
   playerId!: number;
   board!: number[][][];
+  playerName!: string;
 }

@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 
-export class CreateRoomDto {
-  @ApiProperty()
+export class StoreBoardDto {
+  @ApiProperty({ type: [Number] })
   @IsNotEmpty()
-  playerId!: number;
+  board!: number[][][];
 }

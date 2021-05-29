@@ -24,5 +24,4 @@ type Movements = {
 type MoveInfo = {
   isNeighbor: boolean;
   board: Pawn[];
-  winPlayerId: string | null;
 };

@@ -1,52 +1,51 @@
-import { MoveInfo, Movements, Pawn, PownIndex } from "./engine-types";
-import { Hex, Layout, OffsetCoord, Point } from "./hex.lib";
-import { SixPlayersBoard } from "./boards/six-players-board-coords";
-import { TwoPlayersBoard } from "./boards/two-players-board-coords";
-import { Board } from "./boards/board";
-import { FourPlayersBoard } from "./boards/four-players-board-coords";
+import { MoveInfo, Movements, Pawn, PownIndex } from './engine-types';
+import { Hex, Layout, OffsetCoord, Point } from './hex.lib';
+import { SixPlayersBoard } from './boards/six-players-board-coords';
+import { TwoPlayersBoard } from './boards/two-players-board-coords';
+import { Board } from './boards/board';
+import { FourPlayersBoard } from './boards/four-players-board-coords';
 
 export class ChineseCheckersEngine {
   r = 22;
-  public layout: Layout;
-  public board: Board;
+  layout: Layout;
+  board: Board;
   // boardCoordinates: number[][][];
 
   constructor(numberOfPlayers: number) {
     if (numberOfPlayers === 2) {
+      console.log('NB PLAYERS', 2);
       this.board = new TwoPlayersBoard();
     } else if (numberOfPlayers === 4) {
+      console.log('NB PLAYERS', 4);
       this.board = new FourPlayersBoard();
     } else {
+      console.log('NB PLAYERS', 6);
       this.board = new SixPlayersBoard();
     }
     this.layout = new Layout(
       Layout.pointy,
       new Point(this.r, this.r),
-      new Point(400, 325)
+      new Point(400, 325),
     );
   }
 
-  public setBoardType(numberOfPlayers: number, board?: number[][][]) {
+  public setBoardType(numberOfPlayers: number) {
     if (numberOfPlayers === 2) {
-      this.board = new TwoPlayersBoard(board);
-    } else if (numberOfPlayers === 4) {
-      this.board = new FourPlayersBoard(board);
+      this.board = new TwoPlayersBoard();
+    }
+    if (numberOfPlayers === 4) {
+      this.board = new FourPlayersBoard();
     } else {
-      this.board = new SixPlayersBoard(board);
+      this.board = new SixPlayersBoard();
     }
   }
 
-  public setBoardCoordinates(board: number[][][]) {
-    this.board.coords = board;
-  }
-
-  public printHex(hex: Hex) {
-    const hexOffset = OffsetCoord.roffsetFromCube(OffsetCoord.ODD, hex);
-    console.log(hexOffset.col, hexOffset.row);
+  public setBoardCoordinates(newBoard: number[][][]) {
+    this.board.coords = newBoard;
   }
 
   public boardToPawns(board: number[][][]): Pawn[] {
-    var pawns: Pawn[] = [];
+    const pawns: Pawn[] = [];
     // const colors: string[] = [
     //   "green",
     //   "white",
@@ -63,9 +62,9 @@ export class ChineseCheckersEngine {
       playerCoords.forEach((coords) => {
         const hex = OffsetCoord.roffsetToCube(
           -1,
-          new OffsetCoord(coords[0], coords[1])
+          new OffsetCoord(coords[0], coords[1]),
         );
-        var coord = this.layout.hexToPixel(hex);
+        const coord = this.layout.hexToPixel(hex);
         pawns.push({
           hex,
           x: coord.x,
@@ -76,6 +75,10 @@ export class ChineseCheckersEngine {
     });
 
     return pawns;
+  }
+
+  public getBoard(): number[][][] {
+    return this.board.coords;
   }
 
   public defaultBoard(): Pawn[] {
@@ -91,7 +94,7 @@ export class ChineseCheckersEngine {
 
   public isHexInsidePawns = (
     hex: Hex,
-    pawnsInfoCoords: number[][]
+    pawnsInfoCoords: number[][],
   ): boolean => {
     const hexOffset = OffsetCoord.roffsetFromCube(OffsetCoord.ODD, hex);
 
@@ -122,11 +125,11 @@ export class ChineseCheckersEngine {
     };
 
     for (let direction = 0; direction < 6; direction++) {
-      let hexNeighbor = hex.neighbor(direction);
+      const hexNeighbor = hex.neighbor(direction);
       if (
         this.isHexInsidePawns(
           hexNeighbor,
-          this.board.coords[this.board.emptyIndex]
+          this.board.coords[this.board.emptyIndex],
         )
       ) {
         movements.neighborCoords.push(hexNeighbor);
@@ -138,7 +141,7 @@ export class ChineseCheckersEngine {
         if (
           this.isHexInsidePawns(
             checkHex,
-            this.board.coords[this.board.emptyIndex]
+            this.board.coords[this.board.emptyIndex],
           )
         ) {
           movementCount += 1;
@@ -153,7 +156,7 @@ export class ChineseCheckersEngine {
         if (
           !this.isHexInsidePawns(
             checkHex,
-            this.board.coords[this.board.emptyIndex]
+            this.board.coords[this.board.emptyIndex],
           )
         ) {
           break;
@@ -162,7 +165,7 @@ export class ChineseCheckersEngine {
       if (
         this.isHexInsidePawns(
           checkHex,
-          this.board.coords[this.board.emptyIndex]
+          this.board.coords[this.board.emptyIndex],
         )
       ) {
         movements.jumpCoords.push(checkHex);
@@ -178,7 +181,7 @@ export class ChineseCheckersEngine {
 
   public playerCanGoToThisHex(
     availableMovements: Hex[] | null,
-    playerHex: Hex
+    playerHex: Hex,
   ) {
     if (!availableMovements) {
       return false;
@@ -194,79 +197,33 @@ export class ChineseCheckersEngine {
 
   public getPawnIndexInBoard(hex: Hex): PownIndex | null {
     const hexOffset = OffsetCoord.roffsetFromCube(OffsetCoord.ODD, hex);
-    var coordStore = -1;
-    var boardStore = -1;
-    var gobreak = false;
-
     for (
-      var boardIndex = 0;
+      let boardIndex = 0;
       boardIndex < this.board.coords.length;
       boardIndex++
     ) {
       const boardPlayer = this.board.coords[boardIndex];
-
-      var coordIndex = 0;
-      for (coordIndex = 0; coordIndex < boardPlayer.length; coordIndex++) {
+      for (let coordIndex = 0; coordIndex < boardPlayer.length; coordIndex++) {
         const coords = boardPlayer[coordIndex];
         if (this.isCoordsEqualOffset(coords, hexOffset)) {
-          boardStore = boardIndex;
-          coordStore = coordIndex;
-          gobreak = true;
-          break;
-          // return { boardIndex: boardStore, coordIndex: coordStore };
+          return { boardIndex, coordIndex };
         }
       }
-      if (gobreak === true) {
-        break;
-      }
-      // console.log("BOARD INDEX ", boardStore, "coordIndex", coordStore);
-
-      // if (coordStore === -1 || boardStore === -1) {
-      //   return null;
-      // } else {
-      //   return { boardIndex: boardStore, coordIndex: coordStore };
-      // }
     }
-    if (coordStore !== -1 || boardStore !== -1) {
-      return { boardIndex: boardStore, coordIndex: coordStore };
-    } else {
-      return null;
-    }
+    return null;
   }
 
-  public swapPawn(first: PownIndex, second: PownIndex): number[][][] {
-    var posTmp = this.board.coords[first.boardIndex][first.coordIndex];
+  public swapPawn(first: PownIndex, second: PownIndex) {
+    const posTmp = this.board.coords[first.boardIndex][first.coordIndex];
 
     this.board.coords[first.boardIndex][first.coordIndex] =
       this.board.coords[second.boardIndex][second.coordIndex];
     this.board.coords[second.boardIndex][second.coordIndex] = posTmp;
-    return this.board.coords;
   }
 
-  public checkWin(playerid: string): string | null {
-    console.log("Check win ??");
-    let winPlayerId: string | null = null;
-    this.board.coords.forEach((coord, playerIndex) => {
-      if (this.board.emptyIndex !== playerIndex) {
-        const winPlayer = this.board.winPegs[playerIndex];
-        if (winPlayer.sort().join(",") === coord.sort().join(",")) {
-          winPlayerId = playerid;
-        }
-      }
-    });
-
-    return winPlayerId;
-  }
-
-  public move = (
-    posHex: Hex,
-    destHex: Hex,
-    playerId: string
-  ): MoveInfo | null => {
-    let posIndex = this.getPawnIndexInBoard(posHex);
-    let destIndex = this.getPawnIndexInBoard(destHex);
-    console.log("POS INDEX", posIndex);
-    console.log("destIndex INDEX", destIndex);
+  public move = (posHex: Hex, destHex: Hex): MoveInfo => {
+    const posIndex = this.getPawnIndexInBoard(posHex);
+    const destIndex = this.getPawnIndexInBoard(destHex);
     let isNeighbor = false;
     for (let direction = 0; direction < 6; direction++) {
       const hex = posHex.neighbor(direction);
@@ -275,12 +232,11 @@ export class ChineseCheckersEngine {
         isNeighbor = true;
       }
     }
+
     if (posIndex && destIndex) {
-      const boardCoords = this.swapPawn(posIndex, destIndex);
-      const winPlayerId = this.checkWin(playerId);
-      return { board: this.boardToPawns(boardCoords), isNeighbor, winPlayerId };
+      this.swapPawn(posIndex, destIndex);
     }
 
-    return null;
+    return { board: this.boardToPawns(this.board.coords), isNeighbor };
   };
 }

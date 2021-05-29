@@ -41,13 +41,16 @@ export const getRoom =
   };
 
 export const addPlayer =
-  (roomId: string, playerId: string, history: History): AppThunk =>
+  (roomId: string, playerId: string, history?: History): AppThunk =>
   async (dispatch) => {
     roomService
       .addPlayer(roomId, playerId)
       .then((room) => {
         dispatch(findPlayerIndexInRoom(room));
         dispatch(setCurrentRoom(room));
+        if (history) {
+          history.push(Routes.room + "/" + room._id)
+        }
       })
       .catch((error) => {
         // history.push(Routes.home);

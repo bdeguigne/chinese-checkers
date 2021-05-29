@@ -21,6 +21,8 @@ type Player = {
   name: string;
   avatar: Avatar;
   gameId: string;
+  win: number;
+  lose: number;
 };
 
 type Avatar = {
@@ -42,6 +44,13 @@ type GameResponse = {
   roomId: string;
   playerIndex?: number;
   board?: number[][][];
+  playerId: string;
+  playerName: string;
+};
+
+type WinPlayerType = {
+  playerId: string;
+  playerName: string;
 };
 
 type HexType = {

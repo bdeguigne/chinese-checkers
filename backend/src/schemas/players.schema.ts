@@ -8,6 +8,14 @@ export const PlayersSchema = new mongoose.Schema(
       seed: String,
     },
     gameId: String,
+    win: {
+      $type: Number,
+      default: 0,
+    },
+    lose: {
+      $type: Number,
+      default: 0,
+    },
   },
   {
     versionKey: false,

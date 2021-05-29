@@ -56,6 +56,34 @@ export class PlayersService {
     }
   }
 
+  async addWin(playerId: number): Promise<Player> {
+    const player = await this.playerModel
+      .findByIdAndUpdate({ _id: playerId }, { $inc: { win: 1 } }, { new: true })
+      .exec();
+
+    if (player == null) {
+      throw new NotFoundException('Cannot set a game for this player');
+    } else {
+      return player;
+    }
+  }
+
+  async addLoose(playerId: number): Promise<Player> {
+    const player = await this.playerModel
+      .findByIdAndUpdate(
+        { _id: playerId },
+        { $inc: { lose: 1 } },
+        { new: true },
+      )
+      .exec();
+
+    if (player == null) {
+      throw new NotFoundException('Cannot set a game for this player');
+    } else {
+      return player;
+    }
+  }
+
   async isPlayerIsInGame(playerId: number): Promise<number | null> {
     const player = await this.playerModel.findById(playerId);
     if (player) {

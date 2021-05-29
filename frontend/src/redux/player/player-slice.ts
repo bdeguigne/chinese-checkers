@@ -18,6 +18,8 @@ const initialState: PlayerState = {
       seed: "",
       type: "",
     },
+    win: 0,
+    lose: 0,
   },
   playerIndex: null,
   guestMode: false,
@@ -42,6 +44,8 @@ export const playerSlice = createSlice({
           seed: "",
           type: "",
         },
+        win: 0,
+        lose: 0
       };
       state.guestMode = true;
     },

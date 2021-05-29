@@ -10,6 +10,7 @@ type JoinLobbyResponse = {
 type StartGameReponse = {
   roomId: string;
   playerIndex?: number;
+  board?: number[][][];
 };
 
 type PlayerSocket = {

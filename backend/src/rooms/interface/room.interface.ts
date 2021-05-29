@@ -10,4 +10,5 @@ export interface Room extends Document {
   playersCount: number;
   players: RoomPlayerInfo[];
   connectedPlayers: number[];
+  board: number[][][];
 }

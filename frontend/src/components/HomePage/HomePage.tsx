@@ -3,13 +3,20 @@ import "./styles/HomePage.css";
 import "../core/styles/core-styles.css";
 import EnterNameInput from "../EnterNameInput/EnterValueInput";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { createPlayer } from "../../redux/player/player-thunks";
+import {
+  createPlayer,
+  createPlayerAndJoinRoom,
+} from "../../redux/player/player-thunks";
 import { activateGuestMode } from "../../redux/player/player-slice";
 import { Divider, Button } from "antd";
 import { GameAvatar } from "../GameAvatar/GameAvatar";
 import { RouteChildrenProps } from "react-router-dom";
 import { Routes } from "../../App";
-import { createRoom as createRoomThunks } from "../../redux/room/room-thunks";
+import {
+  addPlayer,
+  createRoom as createRoomThunks,
+} from "../../redux/room/room-thunks";
+import { setHasJoinWithHomePage } from "src/redux/room/room-slice";
 // import { io, Socket } from "socket.io-client";
 
 const HomePage: FC<RouteChildrenProps> = (props) => {
@@ -18,6 +25,12 @@ const HomePage: FC<RouteChildrenProps> = (props) => {
   const [seed, setSeed] = useState("");
 
   const player = useAppSelector((state) => state.player.player);
+  const redirectWithLink = useAppSelector(
+    (state) => state.room.redirectWithLink
+  );
+  const currentRoom = useAppSelector((state) => state.room.currentRoom);
+  const hasJoin = useAppSelector((state) => state.room.hasJoin);
+  const isGuestMode = useAppSelector((state) => state.player.guestMode);
 
   const joinRoom = (playerName: string, avatar: Avatar) => {
     if (player.name === "") {
@@ -31,12 +44,14 @@ const HomePage: FC<RouteChildrenProps> = (props) => {
     if (player.name === "") {
       dispatch(createPlayer(playerName, avatar, Routes.room, props.history));
     } else {
+      dispatch(setHasJoinWithHomePage(true));
       dispatch(createRoomThunks(player._id, props.history));
     }
   };
 
   const guestMode = () => {
     dispatch(activateGuestMode());
+    dispatch(setHasJoinWithHomePage(true));
   };
 
   return (
@@ -54,17 +69,82 @@ const HomePage: FC<RouteChildrenProps> = (props) => {
               onSeedChanged={(seed) => setSeed(seed)}
             />
           </div>
+          <div className="home-page__score-container">
+            <p>
+              win : {player.win} / lose : {player.lose}
+            </p>
+          </div>
           <div className="content__container">
-            <EnterNameInput
-              showInput={player.name === ""}
-              customClassName="home-page__input"
-              onButtonPressed={(name) =>
-                joinRoom(name, { type: "human", seed })
-              }
-              onInputChanged={(value) => setName(value)}
-              buttonLabel="Join a room"
-              placeholder="Enter your name"
-            />
+            {redirectWithLink === true && hasJoin === true ? (
+              isGuestMode ? (
+                <EnterNameInput
+                  showInput={player.name === ""}
+                  customClassName="home-page__input"
+                  onButtonPressed={(name) => {
+                    dispatch(setHasJoinWithHomePage(true));
+                    dispatch(
+                      createPlayerAndJoinRoom(
+                        name,
+                        { type: "human", seed },
+                        currentRoom,
+                        props.history
+                      )
+                    );
+                    dispatch(addPlayer(currentRoom._id, player._id));
+                    props.history.push(Routes.room + "/" + currentRoom._id);
+                  }}
+                  onInputChanged={(value) => setName(value)}
+                  buttonLabel="Join invite room"
+                  placeholder="Enter your name"
+                />
+              ) : player.name === "" ? (
+                <EnterNameInput
+                  showInput={player.name === ""}
+                  customClassName="home-page__input"
+                  onButtonPressed={(name) => {
+                    dispatch(setHasJoinWithHomePage(true));
+                    dispatch(
+                      createPlayerAndJoinRoom(
+                        name,
+                        { type: "human", seed },
+                        currentRoom,
+                        props.history
+                      )
+                    );
+                    dispatch(addPlayer(currentRoom._id, player._id));
+                    props.history.push(Routes.room + "/" + currentRoom._id);
+                  }}
+                  onInputChanged={(value) => setName(value)}
+                  buttonLabel="Join invite room"
+                  placeholder="Enter your name"
+                />
+              ) : (
+                <Button
+                  type="primary"
+                  className="home-page__join-button"
+                  disabled={player.name === ""}
+                  onClick={() => {
+                    dispatch(setHasJoinWithHomePage(true));
+                    dispatch(addPlayer(currentRoom._id, player._id));
+                    props.history.push(Routes.room + "/" + currentRoom._id);
+                  }}
+                >
+                  Join invite room
+                </Button>
+              )
+            ) : (
+              <EnterNameInput
+                showInput={player.name === ""}
+                customClassName="home-page__input"
+                onButtonPressed={(name) =>
+                  joinRoom(name, { type: "human", seed })
+                }
+                onInputChanged={(value) => setName(value)}
+                buttonLabel="Join a room"
+                placeholder="Enter your name"
+              />
+            )}
+
             <Divider />
             <Button
               disabled={player.name === "" && name.length === 0}

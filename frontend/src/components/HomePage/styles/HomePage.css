@@ -59,4 +59,14 @@
   width: 100%;
   height: 50px;
 }
+
+.home-page__score-container {
+  margin-bottom: 16px;
+}
+
+.home-page__score-container p {
+  margin: 0;
+  font-weight: bold;
+  font-size: large;
+}
 /*# sourceMappingURL=HomePage.css.map */

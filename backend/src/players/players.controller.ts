@@ -7,6 +7,7 @@ import {
   Delete,
   UseInterceptors,
   UseFilters,
+  Patch,
 } from '@nestjs/common';
 import { PlayersService } from './players.service';
 import { CreatePlayerDto } from './dto/create-player.dto';
@@ -45,14 +46,23 @@ export class PlayersController {
     return this.playersService.findOne(params.id);
   }
 
-  // @Patch(':id')
-  // @UseFilters(new HttpExceptionFilter())
-  // update(
-  //   @Param() params: FindOneParams,
-  //   @Body() updatePlayerDto: UpdatePlayerDto,
-  // ) {
-  //   return this.playersService.update(params.id, updatePlayerDto);
-  // }
+  @Patch(':id/win')
+  @UseInterceptors(
+    new TransformResponseInterceptor('Successfully updated this player'),
+  )
+  @UseFilters(new HttpExceptionFilter())
+  addWin(@Param() params: FindOneParams) {
+    return this.playersService.addWin(params.id);
+  }
+
+  @Patch(':id/lose')
+  @UseInterceptors(
+    new TransformResponseInterceptor('Successfully updated this player'),
+  )
+  @UseFilters(new HttpExceptionFilter())
+  addLoose(@Param() params: FindOneParams) {
+    return this.playersService.addLoose(params.id);
+  }
 
   @Delete('all')
   @UseFilters(new HttpExceptionFilter())

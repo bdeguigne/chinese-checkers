@@ -10,6 +10,12 @@ import { Board } from "../Board/Board";
 import { getRoom } from "../../redux/room/room-thunks";
 import { PlayersTable } from "./PlayersTable/PlayersTable";
 import "./styles/GameLayout.css";
+import { leaveRoom } from "src/redux/room/room-slice";
+import { Routes } from "src/App";
+import {
+  playerWinRequest,
+  playerLoseRequest,
+} from "src/redux/player/player-thunks";
 
 type TParams = { id: string };
 
@@ -20,6 +26,7 @@ enum gameEvents {
   moveFinished = "move-finished",
   updateBoard = "update-board",
   nextPlayer = "next-player",
+  playerWins = "player-wins",
 }
 
 export const GameLayout: FC<RouteComponentProps<TParams>> = (props) => {
@@ -30,6 +37,8 @@ export const GameLayout: FC<RouteComponentProps<TParams>> = (props) => {
   const [updatedBoard, setUpdatedBoard] = useState<number[][][] | null>(null);
   const [ready, setReady] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [winPlayerData, setWinPlayerData] =
+    useState<WinPlayerType | null>(null);
 
   useEffect(() => {
     dispatch(getRoom(props.match.params.id, props.history));
@@ -44,9 +53,13 @@ export const GameLayout: FC<RouteComponentProps<TParams>> = (props) => {
         if (message.event === gameEvents.start) {
           setReady(true);
           setShowModal(true);
-          console.log("START");
+          console.log("START", message.data);
           if (message.data.playerIndex !== undefined) {
             dispatch(setCurrentPlayerIndex(message.data.playerIndex));
+          }
+          if (message.data.board !== undefined) {
+            setUpdatedBoard(message.data.board);
+            // dispatch(setBoard(message.data.board));
           }
         }
 
@@ -71,6 +84,20 @@ export const GameLayout: FC<RouteComponentProps<TParams>> = (props) => {
             dispatch(setCurrentPlayerIndex(message.data.playerIndex));
           }
         }
+
+        if (message.event === gameEvents.playerWins) {
+          if (message.data.playerId && message.data.playerName) {
+            dispatch(
+              message.data.playerId === player._id
+                ? playerWinRequest(player._id)
+                : playerLoseRequest(player._id)
+            );
+            setWinPlayerData({
+              playerId: message.data.playerId,
+              playerName: message.data.playerName,
+            });
+          }
+        }
       });
 
       socket.on("exception", (error: SocketError) => {
@@ -93,12 +120,25 @@ export const GameLayout: FC<RouteComponentProps<TParams>> = (props) => {
     console.log("Move finished ! board :", board);
   };
 
+  const playerWin = (playerId: string) => {
+    const roomId = props.match.params.id;
+    socket.emit("game", {
+      event: gameEvents.playerWins,
+      roomId,
+      playerName: player.name,
+      playerId,
+    });
+  };
+
   return (
     <Layout className="game-layout__layout">
-      {/* <Header className="game-layout--box-shadow">Header</Header> */}
       <Layout className="game-layout__content-layout">
         <Content>
-          <Board moveFinished={moveFinished} board={updatedBoard} />
+          <Board
+            moveFinished={moveFinished}
+            board={updatedBoard}
+            playerWin={playerWin}
+          />
         </Content>
         <Sider
           width={250}
@@ -117,6 +157,37 @@ export const GameLayout: FC<RouteComponentProps<TParams>> = (props) => {
           cancelButtonProps={{ style: { display: "none" } }}
         >
           The game will resume once all players are connected
+        </Modal>
+      )}
+      {showModal && (
+        <Modal
+          title="A player has been disconnected"
+          centered
+          visible={!ready}
+          closable={false}
+          okButtonProps={{ style: { display: "none" } }}
+          cancelButtonProps={{ style: { display: "none" } }}
+        >
+          The game will resume once all players are connected
+        </Modal>
+      )}
+
+      {winPlayerData !== null && (
+        <Modal
+          title={
+            winPlayerData.playerId === player._id ? "You win !" : "You lose :("
+          }
+          centered
+          visible={winPlayerData !== null}
+          closable={false}
+          cancelButtonProps={{ style: { display: "none" } }}
+          okText="Return to homepage"
+          onOk={() => {
+            dispatch(leaveRoom());
+            props.history.push(Routes.home);
+          }}
+        >
+          {`Congratulations ${winPlayerData.playerName} !`}
         </Modal>
       )}
     </Layout>

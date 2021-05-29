@@ -16,6 +16,7 @@ import {
 interface Props {
   moveFinished(board: number[][][]): void;
   board: number[][][] | null;
+  playerWin(playerId: string): void;
 }
 
 export const Board = (props: Props) => {
@@ -27,7 +28,14 @@ export const Board = (props: Props) => {
   const dispatch = useAppDispatch();
   const storedSelectedPawn = useAppSelector((state) => state.game.selectedPawn);
   const playerIndex = useAppSelector((state) => state.player.playerIndex);
-  const currentPlayerIndex = useAppSelector((state) => state.game.currentPlayerIndex);
+  const player = useAppSelector((state) => state.player.player);
+  const currentPlayerIndex = useAppSelector(
+    (state) => state.game.currentPlayerIndex
+  );
+  // var board = useAppSelector((state) => state.game.board);
+  const playersCount = useAppSelector(
+    (state) => state.room.currentRoom.playersCount
+  );
 
   const engine = useContext(EngineContext);
 
@@ -38,22 +46,31 @@ export const Board = (props: Props) => {
 
   const moveFinishedHandler = () => {
     dispatch(moveFinished());
-    props.moveFinished(engine.boardCoordinates);
+    props.moveFinished(engine.board.coords);
   };
 
   useEffect(() => {
     if (props.board) {
       engine.setBoardCoordinates(props.board);
+      engine.setBoardType(playersCount, props.board);
       updatePawns(engine.boardToPawns(props.board));
     }
-  }, [engine, props.board]);
+  }, [engine, playersCount, props.board]);
 
-  useEffect(() => {
-    if (updatePawns) {
-      updatePawns(engine.defaultBoard());
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [engine]);
+  // useEffect(() => {
+  //   if (updatePawns) {
+  //     updatePawns(engine.defaultBoard());
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [engine]);
+
+  // useEffect(() => {
+  //   if (board) {
+  //     engine.setBoardType(playersCount);
+  //     updatePawns(engine.boardToPawns(board));
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [board, engine]);
 
   useEffect(() => {
     if (checkMoveFinished && pawns && currentPawns) {
@@ -98,13 +115,18 @@ export const Board = (props: Props) => {
         storedSelectedPawn.hex.r,
         storedSelectedPawn.hex.s
       );
-      const moveInfo = engine.move(storedSelectedPawnHex, pawn.hex);
-      updatePawns(moveInfo.board);
-      setIsMoveNeighbor(moveInfo.isNeighbor);
-      dispatch(
-        setCurrentHexPosition({ q: pawn.hex.q, r: pawn.hex.r, s: pawn.hex.s })
-      );
-      setCheckMoveFinished(pawn);
+      const moveInfo = engine.move(storedSelectedPawnHex, pawn.hex, player._id);
+      if (moveInfo) {
+        updatePawns(moveInfo.board);
+        setIsMoveNeighbor(moveInfo.isNeighbor);
+        dispatch(
+          setCurrentHexPosition({ q: pawn.hex.q, r: pawn.hex.r, s: pawn.hex.s })
+        );
+        setCheckMoveFinished(pawn);
+        if (moveInfo.winPlayerId !== null) {
+          props.playerWin(moveInfo.winPlayerId);
+        }
+      }
     }
   };
 

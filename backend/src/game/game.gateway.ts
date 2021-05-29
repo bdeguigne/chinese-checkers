@@ -25,6 +25,7 @@ export enum gameEvents {
   moveFinished = 'move-finished',
   updateBoard = 'update-board',
   nextPlayer = 'next-player',
+  playerWins = 'player-wins',
 }
 
 @WebSocketGateway(8080)
@@ -53,10 +54,13 @@ export class GameGateway {
       });
     }
     if (data.event === lobbyEvents.play) {
-      await this.gameService.storeRoomInCache(data.roomId);
-      this.server.to(data.roomId.toString()).emit('lobby', {
-        event: lobbyEvents.play,
-      });
+      const room = await this.gameService.storeRoomInCache(data.roomId);
+      if (room) {
+        await this.gameService.storeBoardInCache(room._id, room.playersCount);
+        this.server.to(data.roomId.toString()).emit('lobby', {
+          event: lobbyEvents.play,
+        });
+      }
     }
     if (data.event === lobbyEvents.leaveLobby) {
       console.log('LEAVE LOBBY');
@@ -87,6 +91,7 @@ export class GameGateway {
         throw new WsException('Incorrect data');
       }
       // TODO Verifier le move
+      await this.gameService.updateBoard(data.board, data.roomId);
       this.server.to(data.roomId.toString()).emit('game', {
         event: gameEvents.updateBoard,
         data: {
@@ -106,6 +111,20 @@ export class GameGateway {
             },
           });
         });
+    }
+
+    if (data.event === gameEvents.playerWins) {
+      if (!data.playerId || !data.roomId || !data.playerName) {
+        throw new WsException('Incorrect data');
+      } else {
+        this.server.to(data.roomId.toString()).emit('game', {
+          event: gameEvents.playerWins,
+          data: {
+            playerId: data.playerId,
+            playerName: data.playerName,
+          },
+        });
+      }
     }
   }
 }

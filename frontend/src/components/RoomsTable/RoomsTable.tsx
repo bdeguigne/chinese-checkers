@@ -6,6 +6,7 @@ import "./styles/rooms-table.css";
 import { ReloadOutlined } from "@ant-design/icons";
 import { RouteChildrenProps } from "react-router-dom";
 import { Routes } from "../../App";
+import { setHasJoinWithHomePage } from "src/redux/room/room-slice";
 
 export const RoomsTable: FC<RouteChildrenProps> = (props) => {
   const dispatch = useAppDispatch();
@@ -57,7 +58,8 @@ export const RoomsTable: FC<RouteChildrenProps> = (props) => {
             onRow={(record, rowIndex) => {
               return {
                 onClick: (event) => {
-                  dispatch(addPlayer(record._id, player._id, props.history));
+                  dispatch(setHasJoinWithHomePage(true));
+                  dispatch(addPlayer(record._id, player._id));
                   props.history.push(Routes.room + "/" + record._id);
                 }, // click row
                 onDoubleClick: (event) => {}, // double click row
