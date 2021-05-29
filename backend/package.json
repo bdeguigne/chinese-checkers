@@ -31,6 +31,7 @@
     "@nestjs/websockets": "^7.6.17",
     "@types/uuid": "^8.3.0",
     "cache-manager": "^3.4.3",
+    "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",
     "dotenv": "^10.0.0",
     "mongoose": "^5.12.9",
