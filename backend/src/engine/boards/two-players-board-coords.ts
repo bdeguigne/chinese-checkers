@@ -1,18 +1,52 @@
-import { Board } from './board';
+import { Board } from "./board";
 
 export class TwoPlayersBoard extends Board {
-  coords: number[][][];
+  public coords: number[][][];
   emptyIndex: number;
   colors: string[];
+  winPegs: number[][][];
 
-  constructor() {
+  constructor(board?: number[][][]) {
     super(); // must call super()
-
-    this.coords = twoPlayersBoardCoords;
+    if (board) {
+      this.coords = board;
+    } else {
+      this.coords = twoPlayersBoardCoords;
+    }
+    this.winPegs = winPegs;
     this.emptyIndex = 2;
-    this.colors = ['green', 'red', 'lightgrey'];
+    this.colors = ["green", "red", "lightgrey"];
   }
 }
+
+export const winPegs = [
+  [
+    // GREEN
+    [0, -8],
+    [-1, -7],
+    [-1, -6],
+    [-2, -5],
+    [0, -7],
+    [0, -6],
+    [-1, -5],
+    [1, -6],
+    [0, -5],
+    [1, -5],
+  ],
+  [
+    // RED
+    [0, 8],
+    [-1, 7],
+    [-1, 6],
+    [-2, 5],
+    [0, 7],
+    [0, 6],
+    [-1, 5],
+    [1, 6],
+    [0, 5],
+    [1, 5],
+  ],
+];
 
 const twoPlayersBoardCoords = [
   [

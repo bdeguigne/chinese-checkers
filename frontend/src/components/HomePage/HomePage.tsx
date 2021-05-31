@@ -136,9 +136,10 @@ const HomePage: FC<RouteChildrenProps> = (props) => {
               <EnterNameInput
                 showInput={player.name === ""}
                 customClassName="home-page__input"
-                onButtonPressed={(name) =>
-                  joinRoom(name, { type: "human", seed })
-                }
+                onButtonPressed={(name) => {
+                  dispatch(setHasJoinWithHomePage(true));
+                  joinRoom(name, { type: "human", seed });
+                }}
                 onInputChanged={(value) => setName(value)}
                 buttonLabel="Join a room"
                 placeholder="Enter your name"
@@ -149,7 +150,10 @@ const HomePage: FC<RouteChildrenProps> = (props) => {
             <Button
               disabled={player.name === "" && name.length === 0}
               className="home-page__join-button"
-              onClick={() => createRoom(name, { type: "human", seed })}
+              onClick={() => {
+                dispatch(setHasJoinWithHomePage(true));
+                createRoom(name, { type: "human", seed });
+              }}
             >
               Create a private room
             </Button>

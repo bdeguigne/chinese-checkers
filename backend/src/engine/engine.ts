@@ -7,19 +7,16 @@ import { FourPlayersBoard } from './boards/four-players-board-coords';
 
 export class ChineseCheckersEngine {
   r = 22;
-  layout: Layout;
-  board: Board;
+  public layout: Layout;
+  public board: Board;
   // boardCoordinates: number[][][];
 
   constructor(numberOfPlayers: number) {
     if (numberOfPlayers === 2) {
-      console.log('NB PLAYERS', 2);
       this.board = new TwoPlayersBoard();
     } else if (numberOfPlayers === 4) {
-      console.log('NB PLAYERS', 4);
       this.board = new FourPlayersBoard();
     } else {
-      console.log('NB PLAYERS', 6);
       this.board = new SixPlayersBoard();
     }
     this.layout = new Layout(
@@ -29,19 +26,23 @@ export class ChineseCheckersEngine {
     );
   }
 
-  public setBoardType(numberOfPlayers: number) {
+  public setBoardType(numberOfPlayers: number, board?: number[][][]) {
     if (numberOfPlayers === 2) {
-      this.board = new TwoPlayersBoard();
-    }
-    if (numberOfPlayers === 4) {
-      this.board = new FourPlayersBoard();
+      this.board = new TwoPlayersBoard(board);
+    } else if (numberOfPlayers === 4) {
+      this.board = new FourPlayersBoard(board);
     } else {
-      this.board = new SixPlayersBoard();
+      this.board = new SixPlayersBoard(board);
     }
   }
 
-  public setBoardCoordinates(newBoard: number[][][]) {
-    this.board.coords = newBoard;
+  public setBoardCoordinates(board: number[][][]) {
+    this.board.coords = board;
+  }
+
+  public printHex(hex: Hex) {
+    const hexOffset = OffsetCoord.roffsetFromCube(OffsetCoord.ODD, hex);
+    console.log(hexOffset.col, hexOffset.row);
   }
 
   public boardToPawns(board: number[][][]): Pawn[] {
@@ -75,10 +76,6 @@ export class ChineseCheckersEngine {
     });
 
     return pawns;
-  }
-
-  public getBoard(): number[][][] {
-    return this.board.coords;
   }
 
   public defaultBoard(): Pawn[] {
@@ -197,33 +194,79 @@ export class ChineseCheckersEngine {
 
   public getPawnIndexInBoard(hex: Hex): PownIndex | null {
     const hexOffset = OffsetCoord.roffsetFromCube(OffsetCoord.ODD, hex);
+    let coordStore = -1;
+    let boardStore = -1;
+    let gobreak = false;
+
     for (
       let boardIndex = 0;
       boardIndex < this.board.coords.length;
       boardIndex++
     ) {
       const boardPlayer = this.board.coords[boardIndex];
-      for (let coordIndex = 0; coordIndex < boardPlayer.length; coordIndex++) {
+
+      let coordIndex = 0;
+      for (coordIndex = 0; coordIndex < boardPlayer.length; coordIndex++) {
         const coords = boardPlayer[coordIndex];
         if (this.isCoordsEqualOffset(coords, hexOffset)) {
-          return { boardIndex, coordIndex };
+          boardStore = boardIndex;
+          coordStore = coordIndex;
+          gobreak = true;
+          break;
+          // return { boardIndex: boardStore, coordIndex: coordStore };
         }
       }
+      if (gobreak === true) {
+        break;
+      }
+      // console.log("BOARD INDEX ", boardStore, "coordIndex", coordStore);
+
+      // if (coordStore === -1 || boardStore === -1) {
+      //   return null;
+      // } else {
+      //   return { boardIndex: boardStore, coordIndex: coordStore };
+      // }
     }
-    return null;
+    if (coordStore !== -1 || boardStore !== -1) {
+      return { boardIndex: boardStore, coordIndex: coordStore };
+    } else {
+      return null;
+    }
   }
 
-  public swapPawn(first: PownIndex, second: PownIndex) {
+  public swapPawn(first: PownIndex, second: PownIndex): number[][][] {
     const posTmp = this.board.coords[first.boardIndex][first.coordIndex];
 
     this.board.coords[first.boardIndex][first.coordIndex] =
       this.board.coords[second.boardIndex][second.coordIndex];
     this.board.coords[second.boardIndex][second.coordIndex] = posTmp;
+    return this.board.coords;
   }
 
-  public move = (posHex: Hex, destHex: Hex): MoveInfo => {
+  public checkWin(playerid: string): string | null {
+    console.log('Check win ??');
+    let winPlayerId: string | null = null;
+    this.board.coords.forEach((coord, playerIndex) => {
+      if (this.board.emptyIndex !== playerIndex) {
+        const winPlayer = this.board.winPegs[playerIndex];
+        if (winPlayer.sort().join(',') === coord.sort().join(',')) {
+          winPlayerId = playerid;
+        }
+      }
+    });
+
+    return winPlayerId;
+  }
+
+  public move = (
+    posHex: Hex,
+    destHex: Hex,
+    playerId: string,
+  ): MoveInfo | null => {
     const posIndex = this.getPawnIndexInBoard(posHex);
     const destIndex = this.getPawnIndexInBoard(destHex);
+    console.log('POS INDEX', posIndex);
+    console.log('destIndex INDEX', destIndex);
     let isNeighbor = false;
     for (let direction = 0; direction < 6; direction++) {
       const hex = posHex.neighbor(direction);
@@ -232,11 +275,12 @@ export class ChineseCheckersEngine {
         isNeighbor = true;
       }
     }
-
     if (posIndex && destIndex) {
-      this.swapPawn(posIndex, destIndex);
+      const boardCoords = this.swapPawn(posIndex, destIndex);
+      const winPlayerId = this.checkWin(playerId);
+      return { board: this.boardToPawns(boardCoords), isNeighbor, winPlayerId };
     }
 
-    return { board: this.boardToPawns(this.board.coords), isNeighbor };
+    return null;
   };
 }

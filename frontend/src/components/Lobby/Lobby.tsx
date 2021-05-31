@@ -53,7 +53,7 @@ export const Lobby: FC<RouteComponentProps<TParams>> = (props) => {
         gameId: "",
         name: "placeholder",
         win: 0,
-        lose: 0
+        lose: 0,
       });
     }
     setPlayersData(playersTmp);
